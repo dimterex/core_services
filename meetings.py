@@ -82,10 +82,10 @@ def periodical(сonfig, start_time, end_time):
             meeting = Meeting(task.name, date, hours)
             task.add_meeting(meeting)
 
-        for task in сonfig.periodical:
-            jira_connection.write_meeting(task.jira_issue_id, task.meetings)
-            # TODO: When we use redmine...
-            # redmine_connection.write_meeting(category.redmine_issue_id, category.meetings)
+    for task in сonfig.periodical:
+        jira_connection.write_meeting(task.jira_issue_id, task.meetings)
+        # TODO: When we use redmine...
+        # redmine_connection.write_meeting(category.redmine_issue_id, category.meetings)
 
 
 def read_outlook(config, start_time, end_time):
@@ -104,8 +104,8 @@ if __name__ == '__main__':
 
     local_tz = get_localzone()
     # TODO: set time from arguments
-    start_time = datetime(2021, 10, 4, tzinfo=local_tz)
-    end_time = datetime(2021, 10, 5, tzinfo=local_tz)
+    start_time = datetime(2021, 10, 6, tzinfo=local_tz)
+    end_time = datetime(2021, 10, 13, tzinfo=local_tz)
 
     # TODO: choose a method from arguments
     write_from_calendar(сonfig, start_time, end_time)
