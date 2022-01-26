@@ -27,16 +27,9 @@
     "email": "test@mail.ru",
     "domain": "DOMAIN",
 
-    "outlook": {
-        "url": "https://mail.***.ru"
-    },
-
-    "jira": {
-        "url": "https://jira.local"
-    },
-    "redmine": {
-        "url": "http://redmine.local"
-    },
+    "outlook_url": "https://mail.***.ru",
+    "jira_url": "https://jira.local",
+    "redmine_url": "http://redmine.local",
 
     "categories": [
         {
@@ -64,3 +57,9 @@
     "ignore": "Ignorable"
 }
 ```
+
+
+### Dependency 
+1. https://pypi.org/project/python-redmine/
+2. https://pypi.org/project/jira/
+3. https://pypi.org/project/exchangelib/

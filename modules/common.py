@@ -15,11 +15,13 @@ class Config:
         self.password = obj['password']
         self.email = obj['email']
         self.domain = obj['domain']
-        self.jira = TaskTrackerConfig(obj['jira']['url'])
-        self.redmine = TaskTrackerConfig(obj['redmine']['url'])
-        self.ignore = obj['ignore']
-        self.outlook = TaskTrackerConfig(obj['outlook']['url'])
 
+        self.jira = obj['jira_url']
+        self.redmine = obj['redmine_url']
+        self.outlook = obj['outlook_url']
+        self.confluence = obj['confluence_url']
+
+        self.ignore = obj['ignore']
         self.categories = {}
         for category in obj['categories']:
             self.categories[category['name']] = TasksCategory(category['name'], category['jira_id'], category['redmine_id'])
@@ -28,10 +30,11 @@ class Config:
         for task in obj['periodical']:
             self.periodical.append(TasksCategory(task['name'], task['jira_id'], task['redmine_id']))
 
-
-class TaskTrackerConfig:
-    def __init__(self, url):
-        self.url = url
+    def clear_categories(self):
+        for cat in self.categories:
+            self.categories[cat].clear()
+        for cat in self.periodical:
+            cat.clear()
 
 
 class TasksCategory:
@@ -43,3 +46,6 @@ class TasksCategory:
 
     def add_meeting(self, meeting):
         self.meetings.append(meeting)
+
+    def clear(self):
+        self.meetings.clear()
