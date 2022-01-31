@@ -138,7 +138,37 @@ def get_hours_by_date(config, start_time):
     return sum_timespent / SECONDS_IN_HOUR
 
 
-def get_correct_task(tasks, current_date, current_time):
+def create_sub_issue(config, task_categories, name):
+    if (task_categories is None):
+        category = config.categories[None]
+    else:
+        if (task_categories[0] not in config.categories):
+            category = config.categories[None]
+        else:
+            category = config.categories[task_categories[0]]
+
+    parrent_issue_id = category.jira_issue_id
+
+    jira_connection = Jira_Connection(сonfig.jira, сonfig.login, сonfig.password)
+    new_issue = jira_connection.create_subtask(name, parrent_issue_id)
+    return new_issue.key
+
+
+def add_meeting_to_correct_category(config, name, jira_issue_id, date, diff):
+
+    category = None
+
+    if jira_issue_id not in config.categories:
+        config.categories[jira_issue_id] = TasksCategory(name, jira_issue_id, None)
+        category = config.categories[jira_issue_id]
+    else:
+        category = config.categories[jira_issue_id]
+
+    jira_worklog = Meeting(name, date, diff)
+    category.add_meeting(jira_worklog)
+
+
+def get_correct_task(config, tasks, current_date, current_time):
     tasks_without_time = []
 
     selected_task = None
@@ -163,6 +193,7 @@ def get_correct_task(tasks, current_date, current_time):
         all_time = 0
         write_time = 0
         is_task_without_time = False
+        raw_jira_issue_id = None
         for item in subtest:
             if 'all=' in item:
                 raw_all_time = item.replace('all=', '')
@@ -177,6 +208,8 @@ def get_correct_task(tasks, current_date, current_time):
                 # print(f'raw_write_time: {raw_write_time}')
                 if not raw_write_time.isspace():
                     write_time = float(raw_write_time)
+            if 'jira_issue_id=' in item:
+                raw_jira_issue_id = item.replace('jira_issue_id=', '')
 
         if is_task_without_time:
             tasks_without_time.append(task_item)
@@ -185,6 +218,7 @@ def get_correct_task(tasks, current_date, current_time):
         if write_time == all_time:
             tasks.remove(task_item)
             task_item.complete()
+            task_item.save()
             # print(f'All time was writed: {subtest}')
             continue
 
@@ -194,15 +228,40 @@ def get_correct_task(tasks, current_date, current_time):
         else:
             write_time += all_time
 
-        task_item.subject = f'{subtest[0]}; all={all_time}; write={write_time};'
+        if raw_jira_issue_id == None or raw_jira_issue_id.isspace():
+            jira_issue_id = create_sub_issue(config, task_item.categories, subtest[0])
+        else:
+            jira_issue_id = raw_jira_issue_id
+
+        add_meeting_to_correct_category(config, subtest[0], jira_issue_id, current_date, write_time)
+        task_item.subject = f'{subtest[0]}; all={all_time}; write={write_time}; jira_issue_id={jira_issue_id}'
         task_item.save()
+
         return task_item, write_time
 
     if len(tasks_without_time) != 0:
         write_time = 8 - current_time
         task_item = random.choice(tasks_without_time)
         subtest = task_item.subject.split(';')
-        task_item.subject = f'{subtest[0]}; write={write_time};'
+
+        writed_time = 0
+        raw_jira_issue_id = None
+        for item in subtest:
+            if 'write=' in item:
+                raw_write_time = item.replace('write=', '')
+                # print(f'raw_write_time: {raw_write_time}')
+                if not raw_write_time.isspace():
+                    writed_time = float(raw_write_time)
+            if 'jira_issue_id=' in item:
+                raw_jira_issue_id = item.replace('jira_issue_id=', '')
+        
+        if raw_jira_issue_id == None or raw_jira_issue_id.isspace():
+            jira_issue_id = create_sub_issue(config, task_item.categories, subtest[0])
+        else:
+            jira_issue_id = raw_jira_issue_id
+
+        add_meeting_to_correct_category(config, subtest[0], jira_issue_id, current_date, write_time)
+        task_item.subject = f'{subtest[0]}; write={writed_time + write_time}; jira_issue_id={jira_issue_id}'
         task_item.save()
         return task_item, write_time
     return None, 0
@@ -227,44 +286,14 @@ def write_from_tasks(config, start_time, end_time):
         # print(hours_by_date)
         while hours_by_date < 8:
             # print(f'Before selected to {date}: Time {hours_by_date}')
-            task, diff = get_correct_task(tasks, date, hours_by_date)
+            task, diff = get_correct_task(config, tasks, date, hours_by_date)
 
             if task is None:
                 break
-            # add_meeting(...)
-
-            jira_worklog = Meeting(task.subject.split(';')[0], date, diff)
-            # print(f'Categories: {task.categories}')
-            if (task.categories is None):
-                category = categories[None]
-            else:
-
-                if (config.ignore in task.categories):
-                    black_list.append(jira_worklog)
-                    continue
-
-                if (task.categories[0] not in categories):
-                    category = categories[None]
-                else:
-                    category = categories[task.categories[0]]
-
-            category.add_meeting(jira_worklog)
 
             hours_by_date += diff
             # print(f'Selected to {date}: Time {hours_by_date}; {task.subject}.')
 
-    # print('\n categories \n')
-    # for cat in categories:
-    #     if cat is None:
-    #         print('needs create issues')
-    #         # print(categories[cat].name, categories[cat].jira_issue_id)
-    #         # for met in categories[cat].meetings:
-    #         #     print('\t', met.name, met.date, met.duration)
-    #     # else:
-    #         # print(categories[cat].name, categories[cat].jira_issue_id)
-    #         # for met in categories[cat].meetings:
-    #         #     print('\t', met.name, met.date, met.duration)
-    
     save_file(black_list)
 
     jira_connection = Jira_Connection(сonfig.jira, сonfig.login, сonfig.password)
@@ -300,10 +329,10 @@ if __name__ == '__main__':
     end_time = end_time.replace(tzinfo=local_tz)
 
     сonfig.clear_categories()
-    write_from_calendar(сonfig, start_time, end_time)
+    # write_from_calendar(сonfig, start_time, end_time)
 
     сonfig.clear_categories()
-    periodical(сonfig, start_time, end_time)
+    # periodical(сonfig, start_time, end_time)
 
     сonfig.clear_categories()
     write_from_tasks(сonfig, start_time, end_time)
