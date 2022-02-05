@@ -1,17 +1,17 @@
 from exchangelib import DELEGATE, Credentials, Account, Configuration, EWSDateTime
 from exchangelib.protocol import BaseProtocol
 
-from urllib.parse import urlparse
-
 import requests.adapters
-import datetime
+
 
 class RootCAAdapter(requests.adapters.HTTPAdapter):
     """An HTTP adapter that uses a custom root CA certificate at a hard coded
     location.
     """
+
     def cert_verify(self, conn, url, verify, cert):
         super().cert_verify(conn=conn, url=url, verify={}, cert=cert)
+
 
 # # Tell exchangelib to use this adapter class instead of the default
 BaseProtocol.HTTP_ADAPTER_CLS = RootCAAdapter
@@ -23,7 +23,6 @@ class Outlook_Connection:
         config = Configuration(server=url, credentials=credentials, auth_type=None)
 
         self.account = Account(email, config=config, autodiscover=True, access_type=DELEGATE)
-
 
     def get_meeting(self, start_time, end_time):
         meetings = []
@@ -73,6 +72,5 @@ class Outlook_Connection:
             # print('{} {}'.format('is_complete', task_item.is_complete))
             # print('{} {}'.format('start_date', task_item.start_date))
             # print('{} {} \n'.format('status', task_item.status))
-            
 
         return tasks
