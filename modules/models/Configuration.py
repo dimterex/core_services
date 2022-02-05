@@ -1,6 +1,6 @@
 import json
 
-from modules.common.TaskCatogory import TasksCategory
+from modules.models.TaskCatogory import TasksCategory
 
 class Config:
     def __init__(self, raw_data):
@@ -23,9 +23,3 @@ class Config:
         self.periodical = []
         for task in obj['periodical']:
             self.periodical.append(TasksCategory(task['name'], task['jira_id']))
-
-    def clear_categories(self):
-        for cat in self.categories:
-            self.categories[cat].clear()
-        for cat in self.periodical:
-            cat.clear()

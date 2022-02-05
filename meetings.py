@@ -1,30 +1,19 @@
-import sys, getopt
-
-from modules.common.Configuration import Config
-from modules.common.WorklogsService import WorklogsService
-from modules.jira_connection import Jira_Connection
-from modules.meetings_writer import Worklog_by_Meetings
-from modules.outlook_connection import Outlook_Connection
-
+import getopt
+import sys
+import warnings
 from datetime import datetime
+
 from tzlocal import get_localzone
 
-import warnings
-
+from modules.connections.jira_connection import Jira_Connection
+from modules.connections.outlook_connection import Outlook_Connection
+from modules.meetings_writer import Worklog_by_Meetings
+from modules.models.Configuration import Config
+from modules.services.worklog_service import Worklog_Service
 from modules.worklog_periodical import Worklog_By_Periodical
 from modules.worklog_tasks import Worklog_By_Tasks
 
 SETTINGS_FILE = 'settings.json'
-
-
-def save_file(meetings):
-    with open('black_list', 'a', encoding='utf8') as file:
-        file.write('-----------{} at {}\n'.format("Black list", datetime.now().strftime("%y-%m-%d")))
-
-        for meeting in meetings:
-            file.write('{}, {}, {}\n'.format(meeting.name, meeting.date, meeting.duration))
-
-        file.write('\n')
 
 
 def convert_rawdate_to_datetime(raw_date):
@@ -58,13 +47,12 @@ if __name__ == '__main__':
     start_time = start_time.replace(tzinfo=local_tz)
     end_time = end_time.replace(tzinfo=local_tz)
 
-    сonfiguration.clear_categories()
     jira_connection = Jira_Connection(сonfiguration.jira, сonfiguration.login, сonfiguration.password)
     domain_login = f'{сonfiguration.domain}\\{сonfiguration.login}'
     outlook_connection = Outlook_Connection(сonfiguration.outlook, сonfiguration.email, domain_login,
                                             сonfiguration.password)
 
-    worklogs_service = WorklogsService()
+    worklogs_service = Worklog_Service()
     worklog_by_Meetings = Worklog_by_Meetings(сonfiguration, start_time, end_time, jira_connection, outlook_connection, worklogs_service)
     worklog_by_Meetings.modify()
 
@@ -77,13 +65,15 @@ if __name__ == '__main__':
     worklog_By_Tasks.modify()
 
     by_dates = worklogs_service.get_by_dates()
-    for dates in by_dates:
-        timelog = 0
-
-        print(f'Day: {dates}')
-        for worklog in by_dates[dates]:
-            timelog += worklog.duration
+    for date in by_dates:
+        timelog = worklogs_service.get_summary_by_date(date)
+        print(f'Day: {date}')
+        for worklog in by_dates[date]:
             print(f'\t {worklog.duration} | {worklog.issue_id} | {worklog.name}')
 
         print(f'\t Summary: {timelog}')
+
+    # TODO: Писать в джиру.
+    # jira_connection.write_worklogs(worklogs_service.worklogs)
+
 
