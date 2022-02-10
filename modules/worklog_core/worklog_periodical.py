@@ -2,7 +2,7 @@ from datetime import timedelta
 
 
 from modules.models.TaskCatogory import TasksCategory
-from modules.helper import supported_day
+from modules.worklog_core.helper import supported_day
 
 
 class Worklog_By_Periodical:

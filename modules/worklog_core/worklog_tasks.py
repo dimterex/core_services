@@ -1,7 +1,7 @@
 from datetime import timedelta
 import random
 
-from modules.helper import supported_day, NEEDS_HOURS
+from modules.worklog_core.helper import supported_day, NEEDS_HOURS
 
 
 class Worklog_By_Tasks:

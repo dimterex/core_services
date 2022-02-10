@@ -1,4 +1,4 @@
-from modules.helper import SECONDS_IN_HOUR
+from modules.worklog_core.helper import SECONDS_IN_HOUR
 
 
 class Worklog_by_Meetings:
