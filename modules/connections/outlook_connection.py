@@ -1,3 +1,5 @@
+import datetime
+
 from exchangelib import DELEGATE, Credentials, Account, Configuration, EWSDateTime
 from exchangelib.protocol import BaseProtocol
 
@@ -20,19 +22,19 @@ BaseProtocol.HTTP_ADAPTER_CLS = RootCAAdapter
 
 
 class Outlook_Connection:
-    def __init__(self, url, email, user, passwrd):
+    def __init__(self, url: str, email: str, user: str, passwrd: str):
         credentials = Credentials(username=user, password=passwrd)
         config = Configuration(server=url, credentials=credentials, auth_type=None)
 
         self.account = Account(email, config=config, autodiscover=True, access_type=DELEGATE)
 
-    def get_meeting(self, start_time, end_time):
+    def get_meeting(self, start_time: datetime.datetime, end_time: datetime.datetime):
         meetings = []
         for i in self.account.calendar.view(start=start_time, end=end_time):
             meetings.append(i)
         return meetings
 
-    def get_tasks(self, start_time, end_time):
+    def get_tasks(self, start_time: datetime.datetime, end_time: datetime.datetime):
         tasks = []
         start_date = EWSDateTime.from_datetime(start_time).date()
         end_date = EWSDateTime.from_datetime(end_time).date()

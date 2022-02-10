@@ -14,7 +14,7 @@ class Consumer:
         self.channel.basic_consume(queue=queue, on_message_callback=self.callback, auto_ack=True)
 
     def callback(self, channel, method, properties, body):
-        self.api_controller.receaved(body)
+        self.api_controller.received(body)
 
     def start(self):
         def run():

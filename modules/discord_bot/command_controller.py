@@ -5,7 +5,7 @@ class Command_Controller:
     def configure(self, action):
         self.commands.append(action)
 
-    def receave_message(self, promise_id: int, message: str):
+    def receive_message(self, promise_id: int, message: str):
         for command in self.commands:
             if message.startswith(command.command):
                 command.execute(promise_id, message)

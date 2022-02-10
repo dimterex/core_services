@@ -25,7 +25,7 @@ class Api_Controller:
 
         type_handlers.add_handler(callback)
 
-    def receaved(self, message: str):
+    def received(self, message: str):
         if message is None:
             return
         obj = json.loads(message)

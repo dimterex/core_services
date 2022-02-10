@@ -1,12 +1,23 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 import random
 
+from modules.connections.jira_connection import Jira_Connection
+from modules.connections.outlook_connection import Outlook_Connection
+from modules.models.configuration import Configuration
+from modules.models.outlook_task import Outlook_Task
 from modules.worklog_core.helper import supported_day, NEEDS_HOURS
+from modules.worklog_core.services.worklog_service import Worklog_Service
 
 
 class Worklog_By_Tasks:
-    def __init__(self, configuration, start_time, end_time, issue_tracker, outlook, worklogs_service):
-        self.worklogs_service = worklogs_service
+    def __init__(self,
+                 configuration: Configuration,
+                 start_time: datetime,
+                 end_time: datetime,
+                 issue_tracker: Jira_Connection,
+                 outlook: Outlook_Connection,
+                 worklog_service: Worklog_Service):
+        self.worklogs_service = worklog_service
         self.configuration = configuration
         self.start_time = start_time
         self.end_time = end_time
@@ -34,7 +45,7 @@ class Worklog_By_Tasks:
                     break
                 wrote_time += diff
 
-    def get_correct_task(self, tasks, current_date, wrote_time):
+    def get_correct_task(self, tasks: list[Outlook_Task], current_date: datetime, wrote_time: float):
         tasks_without_time = []
 
         for task_item in tasks:

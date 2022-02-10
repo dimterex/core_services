@@ -1,10 +1,12 @@
+from exchangelib import Task
+
 ALL_TIME_TO_TASK = 'all='
 WROTE_TIME_TO_TASK = 'write='
 JIRA_ISSUE_ID = 'jira_issue_id='
 
 
 class Outlook_Task:
-    def __init__(self, raw_outlook_task):
+    def __init__(self, raw_outlook_task: Task):
         all_time = None
         write_time = 0
         raw_jira_issue_id = None
@@ -24,11 +26,6 @@ class Outlook_Task:
             if JIRA_ISSUE_ID in item:
                 raw_jira_issue_id = item.replace(JIRA_ISSUE_ID, '')
 
-        # if raw_jira_issue_id is None or raw_jira_issue_id.isspace():
-        #     jira_issue_id = self.create_sub_issue(raw_outlook_task.categories, name)
-        # else:
-        #     jira_issue_id = raw_jira_issue_id
-
         self.jira_issue = raw_jira_issue_id
         self.wrote_time = write_time
         self.limit_time = all_time
@@ -42,7 +39,7 @@ class Outlook_Task:
         print(f'All time was wrote: {self.name}')
         pass
 
-    def update_name(self, need_write_time):
+    def update_name(self, need_write_time: float):
         self.wrote_time += need_write_time
         self.update_subject()
 

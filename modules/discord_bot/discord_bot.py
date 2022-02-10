@@ -16,7 +16,7 @@ class Discord_Bot(discord.Client):
     async def on_message(self, message):
         self.promise_id += 1
         self.promises[self.promise_id] = message.channel.id
-        self.command_controller.receave_message(self.promise_id, message.content)
+        self.command_controller.receive_message(self.promise_id, message.content)
 
     def send_message(self, promise_id, message):
         channel = self.get_channel(self.promises[promise_id])

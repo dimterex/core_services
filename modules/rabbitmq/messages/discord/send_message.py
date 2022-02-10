@@ -4,7 +4,7 @@ from modules.rabbitmq.messages.identificators import DISCORD_SEND_MESSAGE
 
 
 class Send_Message:
-    def __init__(self, promise_id, message):
+    def __init__(self, promise_id: str, message: str):
         self.promise_id = promise_id
         self.message = message
 

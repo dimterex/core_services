@@ -1,9 +1,21 @@
+from datetime import datetime
+
+from modules.connections.jira_connection import Jira_Connection
+from modules.connections.outlook_connection import Outlook_Connection
+from modules.models.configuration import Configuration
 from modules.worklog_core.helper import SECONDS_IN_HOUR
+from modules.worklog_core.services.worklog_service import Worklog_Service
 
 
 class Worklog_by_Meetings:
-    def __init__(self, configuration, start_time, end_time, issue_tracker, outlook, worklogs_service):
-        self.worklogs_service = worklogs_service
+    def __init__(self,
+                 configuration: Configuration,
+                 start_time: datetime,
+                 end_time: datetime,
+                 issue_tracker: Jira_Connection,
+                 outlook: Outlook_Connection,
+                 worklog_service: Worklog_Service):
+        self.worklog_service = worklog_service
         self.configuration = configuration
         self.start_time = start_time
         self.end_time = end_time
@@ -28,5 +40,5 @@ class Worklog_by_Meetings:
                 else:
                     category = self.configuration.categories[calendar_item.categories[0]]
 
-            self.worklogs_service.add_worklog(calendar_item.subject, calendar_item.start, category.jira_issue_id,
-                                              difference.seconds / SECONDS_IN_HOUR)
+            self.worklog_service.add_worklog(calendar_item.subject, calendar_item.start, category.jira_issue_id,
+                                             difference.seconds / SECONDS_IN_HOUR)

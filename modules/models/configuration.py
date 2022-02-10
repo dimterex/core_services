@@ -1,9 +1,10 @@
 import json
 
-from modules.models.TaskCatogory import TasksCategory
+from modules.models.task_catogory import TasksCategory
 
-class Config:
-    def __init__(self, raw_data):
+
+class Configuration:
+    def __init__(self, raw_data: str):
         obj = json.loads(raw_data)
         self.login = obj['login']
         self.password = obj['password']

@@ -1,13 +1,14 @@
-from modules.models.Worklog import Worklog
+from datetime import datetime, date
+
+from modules.models.worklog import Worklog
 
 
 class Worklog_Service:
     def __init__(self):
-        self.worklogs = []
-        self.by_dates = {}
+        self.worklogs: list[Worklog] = []
+        self.by_dates: dict[date, list[Worklog]] = {}
 
-    def add_worklog(self, name, current_date, jira_issue, need_write_time):
-
+    def add_worklog(self, name: str, current_date: datetime, jira_issue: str, need_write_time: float):
         worklog = Worklog(name, current_date, jira_issue, need_write_time)
 
         self.worklogs.append(worklog)
@@ -20,17 +21,17 @@ class Worklog_Service:
     def get_by_dates(self):
         return self.by_dates
 
-    def get_summary_by_datetime(self, date):
-        day = date.date()
+    def get_summary_by_datetime(self, datestamp: datetime):
+        day = datestamp.date()
         return self.get_summary_by_date(day)
 
-    def get_summary_by_date(self, date):
+    def get_summary_by_date(self, datestamp: date):
         summary = 0
 
-        if date not in self.by_dates:
+        if datestamp not in self.by_dates:
             return summary
 
-        for worklog in self.by_dates[date]:
+        for worklog in self.by_dates[datestamp]:
             summary += worklog.duration
 
         return summary
