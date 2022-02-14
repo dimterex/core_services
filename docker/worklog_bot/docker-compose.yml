@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  worklog:
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    container_name: worklog
+    working_dir: /app
+    command: python ./executers/wokrlog_main.py
+    volumes:
+      - ../../:/app
+    environment:
+      - RABBIT_HOST=192.168.0.1
+      - RABBIT_PORT=5672
+    restart: always
+    network_mode: "bridge"
+

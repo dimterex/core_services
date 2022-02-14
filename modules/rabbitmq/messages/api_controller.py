@@ -10,7 +10,10 @@ class Api_Controller:
     def configure(self, queue: str, type: str, callback):
         mapper = None
         if len(self.type_to_queue) != 0:
-            mapper = next(x for x in self.type_to_queue if x.type == type)
+            for type_queue in self.type_to_queue:
+                if type_queue.type == type:
+                    mapper = type_queue
+                    break
 
         if mapper is None:
             mapper = Type_To_Queue_Mapper(type, queue)
@@ -18,7 +21,11 @@ class Api_Controller:
 
         type_handlers = None
         if len(self.handlers) != 0:
-            type_handlers = next(x for x in self.handlers if x.type == type)
+            for x in self.handlers:
+                if x.type == type:
+                    type_handlers = x
+                    break
+
         if type_handlers is None:
             type_handlers = Type_Handlers(type)
             self.handlers.append(type_handlers)

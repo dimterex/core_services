@@ -1,11 +1,12 @@
 import datetime
 
-from exchangelib import DELEGATE, Credentials, Account, Configuration, EWSDateTime
+from exchangelib import DELEGATE, Credentials, Account, Configuration, EWSDateTime, Task
 from exchangelib.protocol import BaseProtocol
 
 import requests.adapters
 
-from modules.models.outlook_task import Outlook_Task
+from modules.models.outlook_meeting import Outlook_Meeting
+from modules.models.outlook_task import Outlook_Task, ALL_TIME_TO_TASK, JIRA_ISSUE_ID
 
 
 class RootCAAdapter(requests.adapters.HTTPAdapter):
@@ -29,13 +30,13 @@ class Outlook_Connection:
         self.account = Account(email, config=config, autodiscover=True, access_type=DELEGATE)
 
     def get_meeting(self, start_time: datetime.datetime, end_time: datetime.datetime):
-        meetings = []
+        meetings: list[Outlook_Meeting] = []
         for i in self.account.calendar.view(start=start_time, end=end_time):
-            meetings.append(i)
+            meetings.append(Outlook_Meeting(i))
         return meetings
 
     def get_tasks(self, start_time: datetime.datetime, end_time: datetime.datetime):
-        tasks = []
+        tasks: list[Outlook_Task] = []
         start_date = EWSDateTime.from_datetime(start_time).date()
         end_date = EWSDateTime.from_datetime(end_time).date()
 
@@ -52,6 +53,21 @@ class Outlook_Connection:
             if task_item.start_date > end_date:
                 continue
 
-            task = Outlook_Task(task_item)
-            tasks.append(task)
+            tasks.append(Outlook_Task(task_item))
         return tasks
+
+    def create_task(self, name: str, start_date: datetime.datetime, duration: float, issue_id: str):
+        tasks = []
+        task_item = Task()
+
+        task_item.start_date = EWSDateTime.from_datetime(start_date).date()
+        new_name = []
+        new_name.append(name)
+        if duration > 0:
+            new_name.append(f'{ALL_TIME_TO_TASK}{duration}')
+        new_name.append(f'{JIRA_ISSUE_ID}{issue_id}')
+
+        task_item.subject = ';'.join(new_name)
+        tasks.append(task_item)
+        self.account.bulk_create(folder=self.account.tasks, items=tasks)
+

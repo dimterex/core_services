@@ -4,7 +4,7 @@ from modules.rabbitmq.messages.identificators import WORKLOG_WRITE_MESSAGE
 
 
 class Write_Worklog:
-    def __init__(self, promise_id, start_day, end_date):
+    def __init__(self, promise_id: str, start_day: str, end_date: str):
         self.end_date = end_date
         self.start_day = start_day
         self.promise_id = promise_id
