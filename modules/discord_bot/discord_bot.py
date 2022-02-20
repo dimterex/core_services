@@ -17,8 +17,13 @@ class Discord_Bot(discord.Client):
         self.promise_id += 1
         self.promises[self.promise_id] = message.channel.id
         self.command_controller.receive_message(self.promise_id, message.content)
+        print(f'Received message: {message}')
 
     def send_message(self, promise_id, message):
-        channel = self.get_channel(self.promises[promise_id])
-        if channel is not None:
-            self.loop.create_task(channel.send(message))
+        if promise_id in self.promises:
+            channel_id = self.promises[promise_id]
+            channel = self.get_channel(channel_id)
+            if channel is not None:
+                self.loop.create_task(channel.send(message))
+        else:
+            print(f'Cant send promise: {promise_id}; message: {message}')

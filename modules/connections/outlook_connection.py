@@ -24,23 +24,31 @@ BaseProtocol.HTTP_ADAPTER_CLS = RootCAAdapter
 
 class Outlook_Connection:
     def __init__(self, url: str, email: str, user: str, passwrd: str):
+        self.email = email
         credentials = Credentials(username=user, password=passwrd)
-        config = Configuration(server=url, credentials=credentials, auth_type=None)
-
-        self.account = Account(email, config=config, autodiscover=True, access_type=DELEGATE)
+        self.config = Configuration(server=url, credentials=credentials, auth_type=None)
 
     def get_meeting(self, start_time: datetime.datetime, end_time: datetime.datetime):
+        print('Connecting to outlook for get meetings...')
+        account = Account(self.email, config=self.config, autodiscover=True, access_type=DELEGATE)
+
+        print('Connected to outlook for get meetings...')
         meetings: list[Outlook_Meeting] = []
-        for i in self.account.calendar.view(start=start_time, end=end_time):
+        for i in account.calendar.view(start=start_time, end=end_time):
             meetings.append(Outlook_Meeting(i))
+
+        account.protocol.close()
+        print('Disconnected to outlook for get meetings...')
         return meetings
 
     def get_tasks(self, start_time: datetime.datetime, end_time: datetime.datetime):
+        print('Connecting to outlook for get tasks...')
         tasks: list[Outlook_Task] = []
         start_date = EWSDateTime.from_datetime(start_time).date()
         end_date = EWSDateTime.from_datetime(end_time).date()
-
-        for task_item in self.account.tasks.all():
+        account = Account(self.email, config=self.config, autodiscover=True, access_type=DELEGATE)
+        print('Connected to outlook for get tasks...')
+        for task_item in account.tasks.all():
             if task_item.start_date is None:
                 continue
 
@@ -54,9 +62,13 @@ class Outlook_Connection:
                 continue
 
             tasks.append(Outlook_Task(task_item))
+
+        account.protocol.close()
+        print('Disconnected to outlook for get tasks...')
         return tasks
 
     def create_task(self, name: str, start_date: datetime.datetime, duration: float, issue_id: str):
+        print('Connecting to outlook for creating task...')
         tasks = []
         task_item = Task()
 
@@ -69,5 +81,8 @@ class Outlook_Connection:
 
         task_item.subject = ';'.join(new_name)
         tasks.append(task_item)
-        self.account.bulk_create(folder=self.account.tasks, items=tasks)
-
+        account = Account(self.email, config=self.config, autodiscover=True, access_type=DELEGATE)
+        print('Connected to outlook for creating task...')
+        account.bulk_create(folder=account.tasks, items=tasks)
+        account.protocol.close()
+        print('Disconnected to outlook for creating task...')

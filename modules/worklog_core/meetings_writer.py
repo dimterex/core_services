@@ -40,5 +40,5 @@ class Worklog_by_Meetings:
                 else:
                     category = self.configuration.categories[calendar_item.categories[0]]
 
-            self.worklog_service.add_worklog(calendar_item.subject, calendar_item.start, category.jira_issue_id,
+            self.worklog_service.add_worklog(calendar_item.name, calendar_item.start, category.jira_issue_id,
                                              difference.seconds / SECONDS_IN_HOUR)

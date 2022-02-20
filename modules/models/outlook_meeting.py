@@ -7,4 +7,5 @@ class Outlook_Meeting:
         self.start = raw_outlook_meeting.start
         self.name = raw_outlook_meeting.subject
         self.categories = raw_outlook_meeting.categories
-        self.description = raw_outlook_meeting.body
+        self.description = raw_outlook_meeting.text_body
+        self.location = raw_outlook_meeting.location

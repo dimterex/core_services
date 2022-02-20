@@ -28,63 +28,61 @@ def convert_rawdate_to_datetime(raw_date: str):
     return datetime.strptime(raw_date, '%Y/%m/%d')
 
 
+def main():
+    host = socket.gethostbyname(os.environ[HOST_ENVIRON])
+    raw_port = os.environ[PORT_ENVIRON]
+    port = int(raw_port)
+
+    api_controller = Api_Controller()
+    publisher = Publisher(host, port)
+    consumer = Consumer(host, port, WORKLOG_QUEUE, api_controller)
+
+    configuration = None
+    with open(SETTINGS_FILE, 'r', encoding='utf8') as json_file:
+        raw_data = json_file.read()
+        configuration = Configuration(raw_data)
+
+    jira_connection = Jira_Connection(configuration.jira, configuration.login, configuration.password)
+    domain_login = f'{configuration.domain}\\{configuration.login}'
+    outlook_connection = Outlook_Connection(configuration.outlook, configuration.email, domain_login, configuration.password)
+
+    def write_worklog_action(obj):
+        promise_id = obj['promise_id']
+        start_time = convert_rawdate_to_datetime(obj['start_day'])
+        end_time = convert_rawdate_to_datetime(obj['end_date'])
+
+        start_time = start_time.replace(tzinfo=timezone.utc)
+        end_time = end_time.replace(tzinfo=timezone.utc)
+
+        worklogs_service = Worklog_Service()
+        Worklog_by_Meetings(configuration, start_time, end_time, jira_connection, outlook_connection, worklogs_service).modify()
+        Worklog_By_Periodical(configuration, start_time, end_time, worklogs_service).modify()
+        Worklog_By_Tasks(configuration, start_time, end_time, jira_connection, outlook_connection, worklogs_service).modify()
+
+        by_dates = worklogs_service.get_by_dates()
+        message: list[str] = []
+        for date in by_dates:
+            timelog = worklogs_service.get_summary_by_date(date)
+            message.append(f'Day: {date}')
+            # print(f'Day: {date}')
+            for worklog in by_dates[date]:
+                url = f'{configuration.jira}/browse/{worklog.issue_id}'
+                message.append(f'\t {worklog.duration} | {url} | {worklog.name}')
+                # print(f'\t {worklog.duration} | {worklog.issue_id} | {worklog.name}')
+
+            # print(f'\t Summary: {timelog}')
+            message.append(f'\t Summary: {timelog}')
+
+        publisher.send_message(DISCORD_QUEUE, Send_Message(promise_id, '\n'.join(message)).to_json())
+        jira_connection.write_worklogs(worklogs_service.worklogs)
+
+    api_controller.configure(WORKLOG_QUEUE, WORKLOG_WRITE_MESSAGE, write_worklog_action)
+
+    consumer.start()
+
+
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
-    try:
-        host = socket.gethostbyname(os.environ[HOST_ENVIRON])
-        raw_port = os.environ[PORT_ENVIRON]
-        port = int(raw_port)
-
-        api_controller = Api_Controller()
-        publisher = Publisher(host, port)
-        consumer = Consumer(host, port, WORKLOG_QUEUE, api_controller)
-
-        configuration = None
-        with open(SETTINGS_FILE, 'r', encoding='utf8') as json_file:
-            raw_data = json_file.read()
-            configuration = Configuration(raw_data)
-
-        jira_connection = Jira_Connection(configuration.jira, configuration.login, configuration.password)
-        domain_login = f'{configuration.domain}\\{configuration.login}'
-        outlook_connection = Outlook_Connection(configuration.outlook, configuration.email, domain_login, configuration.password)
-
-        def write_worklog_action(obj):
-            promise_id = obj['promise_id']
-            start_time = convert_rawdate_to_datetime(obj['start_day'])
-            end_time = convert_rawdate_to_datetime(obj['end_date'])
-
-            start_time = start_time.replace(tzinfo=timezone.utc)
-            end_time = end_time.replace(tzinfo=timezone.utc)
-
-            worklogs_service = Worklog_Service()
-            Worklog_by_Meetings(configuration, start_time, end_time, jira_connection, outlook_connection, worklogs_service).modify()
-            Worklog_By_Periodical(configuration, start_time, end_time, worklogs_service).modify()
-            Worklog_By_Tasks(configuration, start_time, end_time, jira_connection, outlook_connection, worklogs_service).modify()
-
-            by_dates = worklogs_service.get_by_dates()
-            message: list[str] = []
-            for date in by_dates:
-                timelog = worklogs_service.get_summary_by_date(date)
-                message.append(f'Day: {date}')
-                # print(f'Day: {date}')
-                for worklog in by_dates[date]:
-                    url = f'{configuration.jira}/browse/{worklog.issue_id}'
-                    message.append(f'\t {worklog.duration} | {url} | {worklog.name}')
-                    # print(f'\t {worklog.duration} | {worklog.issue_id} | {worklog.name}')
-
-                # print(f'\t Summary: {timelog}')
-                message.append(f'\t Summary: {timelog}')
-
-            jira_connection.write_worklogs(worklogs_service.worklogs)
-            publisher.send_message(DISCORD_QUEUE, Send_Message(promise_id, '\n'.join(message)).to_json())
-
-        api_controller.configure(WORKLOG_QUEUE, WORKLOG_WRITE_MESSAGE, write_worklog_action)
-
-        consumer.start()
-
-    except KeyboardInterrupt:
-        print('Interrupted')
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
+    print('Starting')
+    main()
+    print('Started')
