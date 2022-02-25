@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 
 from modules.connections.outlook_connection import Outlook_Connection
 from modules.models.configuration import Configuration
+from modules.models.outlook_meeting import Outlook_Meeting
 from modules.rabbitmq.messages.api_controller import Api_Controller
 from modules.rabbitmq.messages.discord.send_message import Send_Message
 from modules.rabbitmq.messages.identificators import WORKLOG_QUEUE, DISCORD_QUEUE, OUTLOOK_QUEUE, \
@@ -60,7 +61,18 @@ def main():
         start_time = start_time.replace(tzinfo=timezone.utc)
         end_time = end_time.replace(tzinfo=timezone.utc)
         meetings = outlook_connection.get_meeting(start_time, end_time)
+        selected_meetings: list[Outlook_Meeting] = []
         for meeting in meetings:
+            if start_time > meeting.start:
+                continue
+            if len(selected_meetings) == 0:
+                selected_meetings.append(meeting)
+            else:
+                first_item = selected_meetings[0]
+                if first_item.start == meeting.start:
+                    selected_meetings.append(meeting)
+
+        for meeting in selected_meetings:
             meeting_start_time = meeting.start.replace(hour=meeting.start.hour + 7)
             meeting_end_time = meeting.end.replace(hour=meeting.end.hour + 7)
             message: list[str] = [
@@ -71,7 +83,6 @@ def main():
                 f'\n\tContent: {meeting.description}'
             ]
             publisher.send_message(DISCORD_QUEUE, Send_Message(promise_id, '\n'.join(message)).to_json())
-            return
 
     api_controller.configure(OUTLOOK_QUEUE, OUTLOOK_CREATE_TASK_MESSAGE, create_task_action)
     api_controller.configure(OUTLOOK_QUEUE, GET_NEXT_MEETING_MESSAGE, get_next_meeting)

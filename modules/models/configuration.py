@@ -17,9 +17,13 @@ class Configuration:
         self.confluence = obj['confluence_url']
 
         self.ignore = obj['ignore']
-        self.categories = {}
-        for category in obj['categories']:
-            self.categories[category['name']] = TasksCategory(category['name'], category['jira_id'])
+        self.meetings_categories = {}
+        for category in obj['meetings_categories']:
+            self.meetings_categories[category['name']] = TasksCategory(category['name'], category['jira_id'])
+
+        self.tasks_categories = {}
+        for category in obj['tasks_categories']:
+            self.tasks_categories[category['name']] = TasksCategory(category['name'], category['jira_id'])
 
         self.periodical = []
         for task in obj['periodical']:

@@ -26,8 +26,8 @@ class Worklog_By_Periodical:
                 continue
 
             for task in self.configuration.periodical:
-                if task not in self.configuration.categories:
-                    self.configuration.categories[task] = TasksCategory(task.name, task.jira_issue_id)
+                if task not in self.configuration.meetings_categories:
+                    self.configuration.meetings_categories[task] = TasksCategory(task.name, task.jira_issue_id)
 
-                category = self.configuration.categories[task]
+                category = self.configuration.meetings_categories[task]
                 self.worklog_service.add_worklog(task.name, date, category.jira_issue_id, hours)

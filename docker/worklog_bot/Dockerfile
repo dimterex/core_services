@@ -6,6 +6,8 @@ USER root
 
 COPY requirements.txt ./
 
+COPY ../../ /app
+
 ENV PYTHONPATH "${PYTHONPATH}:/app"
 
 RUN python -m pip install --upgrade pip

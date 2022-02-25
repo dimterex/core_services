@@ -28,17 +28,17 @@ class Worklog_by_Meetings:
         for calendar_item in meetings:
             difference = calendar_item.end - calendar_item.start
 
-            if calendar_item.categories is None:
-                category = self.configuration.categories[None]
+            if calendar_item.meetings_categories is None:
+                category = self.configuration.meetings_categories[None]
             else:
 
-                if self.configuration.ignore in calendar_item.categories:
+                if self.configuration.ignore in calendar_item.meetings_categories:
                     continue
 
-                if calendar_item.categories[0] not in self.configuration.categories:
-                    category = self.configuration.categories[None]
+                if calendar_item.meetings_categories[0] not in self.configuration.meetings_categories:
+                    category = self.configuration.meetings_categories[None]
                 else:
-                    category = self.configuration.categories[calendar_item.categories[0]]
+                    category = self.configuration.meetings_categories[calendar_item.meetings_categories[0]]
 
             self.worklog_service.add_worklog(calendar_item.name, calendar_item.start, category.jira_issue_id,
                                              difference.seconds / SECONDS_IN_HOUR)

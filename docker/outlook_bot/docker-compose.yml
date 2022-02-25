@@ -11,7 +11,7 @@ services:
     volumes:
       - ../../:/app
     environment:
-      - RABBIT_HOST=192.168.0.1
+      - RABBIT_HOST=dimterex.duckdns.org
       - RABBIT_PORT=5672
     restart: always
     network_mode: "bridge"

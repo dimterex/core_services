@@ -89,12 +89,12 @@ class Worklog_By_Tasks:
             task_categories = task.get_categories()
 
             if task_categories is None:
-                category = self.configuration.categories[None]
+                category = self.configuration.tasks_categories[None]
             else:
-                if task_categories[0] not in self.configuration.categories:
-                    category = self.configuration.categories[None]
+                if task_categories[0] not in self.configuration.tasks_categories:
+                    category = self.configuration.tasks_categories[None]
                 else:
-                    category = self.configuration.categories[task_categories[0]]
+                    category = self.configuration.tasks_categories[task_categories[0]]
 
             parent_issue_id = category.jira_issue_id
             new_issue = self.issue_tracker.create_subtask(task.name, parent_issue_id)

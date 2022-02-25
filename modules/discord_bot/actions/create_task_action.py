@@ -18,20 +18,20 @@ class Create_Task_Action:
         self.comment = '\n'.join(comment)
 
     def execute(self, promise_id, message):
-        messages = message.split(' ')
+        messages = message.split('--')
         start_date = ''
         name = ''
         duration = 0
         issue_id = ''
         for item in messages:
-            if '--start' in item:
-                start_date = item.replace('--start=', '')
-            if '--name' in item:
-                name = item.replace('--name=', '')
-            if '--end' in item:
-                raw_duration = item.replace('--duration=', '')
+            if 'start' in item:
+                start_date = item.replace('start=', '')
+            if 'name' in item:
+                name = item.replace('name=', '')
+            if 'end' in item:
+                raw_duration = item.replace('duration=', '')
                 duration = float(raw_duration)
-            if '--end' in item:
-                issue_id = item.replace('--issue=', '')
+            if 'issue' in item:
+                issue_id = item.replace('issue=', '')
 
         self.publisher.send_message(OUTLOOK_QUEUE, Create_Task(promise_id, name, start_date, duration, issue_id).to_json())
