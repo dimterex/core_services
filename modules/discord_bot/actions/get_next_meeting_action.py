@@ -1,5 +1,4 @@
 from modules.rabbitmq.messages.identificators import OUTLOOK_QUEUE
-from modules.rabbitmq.messages.outlook.create_task import Create_Task
 from modules.rabbitmq.messages.outlook.get_next_meeting import Get_Next_Meeting
 from modules.rabbitmq.publisher import Publisher
 

@@ -11,34 +11,32 @@ class Worklog_by_Meetings:
     def __init__(self,
                  configuration: Configuration,
                  start_time: datetime,
-                 end_time: datetime,
                  issue_tracker: Jira_Connection,
                  outlook: Outlook_Connection,
                  worklog_service: Worklog_Service):
         self.worklog_service = worklog_service
         self.configuration = configuration
         self.start_time = start_time
-        self.end_time = end_time
         self.issue_tracker = issue_tracker
         self.outlook = outlook
 
     def modify(self):
-        meetings = self.outlook.get_meeting(self.start_time, self.end_time)
+        meetings = self.outlook.get_meeting(self.start_time)
 
         for calendar_item in meetings:
             difference = calendar_item.end - calendar_item.start
 
-            if calendar_item.meetings_categories is None:
+            if calendar_item.categories is None:
                 category = self.configuration.meetings_categories[None]
             else:
 
-                if self.configuration.ignore in calendar_item.meetings_categories:
+                if self.configuration.ignore in calendar_item.categories:
                     continue
 
-                if calendar_item.meetings_categories[0] not in self.configuration.meetings_categories:
+                if calendar_item.categories[0] not in self.configuration.meetings_categories:
                     category = self.configuration.meetings_categories[None]
                 else:
-                    category = self.configuration.meetings_categories[calendar_item.meetings_categories[0]]
+                    category = self.configuration.meetings_categories[calendar_item.categories[0]]
 
             self.worklog_service.add_worklog(calendar_item.name, calendar_item.start, category.jira_issue_id,
                                              difference.seconds / SECONDS_IN_HOUR)

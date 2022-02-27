@@ -7,12 +7,18 @@ services:
       context: .
     container_name: outlook
     working_dir: /app
+    hostname: outlook
     command: python ./executers/outlook_main.py
     volumes:
       - ../../:/app
     environment:
-      - RABBIT_HOST=dimterex.duckdns.org
+      - RABBIT_HOST=my_rabbit
       - RABBIT_PORT=5672
-    restart: always
-    network_mode: "bridge"
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+networks:
+  default:
+    external:
+      name: internal_network
 

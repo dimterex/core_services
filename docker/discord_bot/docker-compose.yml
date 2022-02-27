@@ -2,17 +2,23 @@ version: '3'
 
 services:
   discord:
-    build: 
+    build:
       dockerfile: Dockerfile
       context: .
     container_name: discord
     working_dir: /app
+    hostname: discord_bot
     command: python ./executers/discord_bot_main.py
     volumes:
       - ../../:/app
     environment:
-      - RABBIT_HOST=dimterex.duckdns.org
+      - RABBIT_HOST=my_rabbit
       - RABBIT_PORT=5672
-      - DISCORD_TOKEN=OTM5NDgzMDQyMzQ1NTE3MTI2.Yf5fxA.R4v-Z8cIRqLX6QUGUOda6R7msLk
-    restart: always
-    network_mode: "bridge"
+      - DISCORD_TOKEN=Token
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+networks:
+  default:
+    external:
+      name: internal_network

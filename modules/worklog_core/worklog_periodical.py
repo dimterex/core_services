@@ -10,24 +10,21 @@ class Worklog_By_Periodical:
     def __init__(self,
                  configuration: Configuration,
                  start_time: datetime,
-                 end_time: datetime,
                  worklog_service: Worklog_Service):
         self.worklog_service = worklog_service
         self.configuration = configuration
         self.start_time = start_time
-        self.end_time = end_time
 
     def modify(self):
-        date_generated = [self.start_time + timedelta(days=x) for x in range(0, (self.end_time - self.start_time).days)]
         hours = 0.5
 
-        for date in date_generated:
-            if not supported_day(date):
-                continue
+        if not supported_day(self.start_time):
+            return
 
-            for task in self.configuration.periodical:
-                if task not in self.configuration.meetings_categories:
-                    self.configuration.meetings_categories[task] = TasksCategory(task.name, task.jira_issue_id)
+        for task in self.configuration.periodical:
+            if task not in self.configuration.meetings_categories:
+                self.configuration.meetings_categories[task] = TasksCategory(task.name, task.jira_issue_id)
 
-                category = self.configuration.meetings_categories[task]
-                self.worklog_service.add_worklog(task.name, date, category.jira_issue_id, hours)
+            category = self.configuration.meetings_categories[task]
+            self.worklog_service.add_worklog(task.name, self.start_time.replace(hour=7), category.jira_issue_id, hours)
+

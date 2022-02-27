@@ -1,9 +1,12 @@
 import sys
 import os
+import time
 import warnings
 import socket
 
 from datetime import datetime, timezone
+
+from todoist_api_python.api import TodoistAPI
 
 from modules.connections.jira_connection import Jira_Connection
 from modules.connections.outlook_connection import Outlook_Connection
@@ -16,11 +19,12 @@ from modules.worklog_core.meetings_writer import Worklog_by_Meetings
 from modules.models.configuration import Configuration
 from modules.worklog_core.services.worklog_service import Worklog_Service
 from modules.worklog_core.worklog_periodical import Worklog_By_Periodical
-from modules.worklog_core.worklog_tasks import Worklog_By_Tasks
+from modules.worklog_core.worklog_tasks_v2 import Worklog_By_Tasks_v2
 
 SETTINGS_FILE = 'settings.json'
 HOST_ENVIRON = 'RABBIT_HOST'
 PORT_ENVIRON = 'RABBIT_PORT'
+TODOIST_API_TOKEN = 'TODOIST_API_TOKEN'
 
 
 def convert_rawdate_to_datetime(raw_date: str):
@@ -31,6 +35,7 @@ def convert_rawdate_to_datetime(raw_date: str):
 def main():
     host = socket.gethostbyname(os.environ[HOST_ENVIRON])
     raw_port = os.environ[PORT_ENVIRON]
+    todoistToken = os.environ[TODOIST_API_TOKEN]
     port = int(raw_port)
 
     api_controller = Api_Controller()
@@ -46,32 +51,27 @@ def main():
     domain_login = f'{configuration.domain}\\{configuration.login}'
     outlook_connection = Outlook_Connection(configuration.outlook, configuration.email, domain_login, configuration.password)
 
+    todoistApi = TodoistAPI(todoistToken)
+
     def write_worklog_action(obj):
         promise_id = obj['promise_id']
         start_time = convert_rawdate_to_datetime(obj['start_day'])
-        end_time = convert_rawdate_to_datetime(obj['end_date'])
 
         start_time = start_time.replace(tzinfo=timezone.utc)
-        end_time = end_time.replace(tzinfo=timezone.utc)
 
         worklogs_service = Worklog_Service()
-        Worklog_by_Meetings(configuration, start_time, end_time, jira_connection, outlook_connection, worklogs_service).modify()
-        Worklog_By_Periodical(configuration, start_time, end_time, worklogs_service).modify()
-        Worklog_By_Tasks(configuration, start_time, end_time, jira_connection, outlook_connection, worklogs_service).modify()
+        Worklog_by_Meetings(configuration, start_time, jira_connection, outlook_connection, worklogs_service).modify()
+        Worklog_By_Periodical(configuration, start_time, worklogs_service).modify()
+        Worklog_By_Tasks_v2(configuration, start_time, jira_connection, todoistApi, worklogs_service).modify()
 
-        by_dates = worklogs_service.get_by_dates()
         message: list[str] = []
-        for date in by_dates:
-            timelog = worklogs_service.get_summary_by_date(date)
-            message.append(f'Day: {date}')
-            # print(f'Day: {date}')
-            for worklog in by_dates[date]:
-                url = f'{configuration.jira}/browse/{worklog.issue_id}'
-                message.append(f'\t {worklog.duration} | {url} | {worklog.name}')
-                # print(f'\t {worklog.duration} | {worklog.issue_id} | {worklog.name}')
+        timelog = worklogs_service.get_summary()
+        message.append(f'Day: {start_time}')
+        for worklog in worklogs_service.worklogs:
+            url = f'{configuration.jira}/browse/{worklog.issue_id}'
+            message.append(f'\t {worklog.duration} | {url} | {worklog.name}')
 
-            # print(f'\t Summary: {timelog}')
-            message.append(f'\t Summary: {timelog}')
+        message.append(f'\t Summary: {timelog}')
 
         publisher.send_message(DISCORD_QUEUE, Send_Message(promise_id, '\n'.join(message)).to_json())
         jira_connection.write_worklogs(worklogs_service.worklogs)
@@ -86,3 +86,9 @@ if __name__ == '__main__':
     print('Starting')
     main()
     print('Started')
+    try:
+        while True:
+            time.sleep(1)
+    finally:
+        pass
+

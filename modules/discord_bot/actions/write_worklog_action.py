@@ -9,20 +9,13 @@ class Write_Worklog_Action:
         self.command = '/write_time'
         comment = [
             'Write time by period:'
-            '\t--start= Datetime (2022/01/01)'
-            '\t--end= Datetime (2022/01/12)'
+            '\tDatetime (2022/01/01)'
         ]
 
         self.comment = '\n'.join(comment)
 
     def execute(self, promise_id, message):
         messages = message.split(' ')
-        start_date = ''
-        end_date = ''
-        for item in messages:
-            if '--start' in item:
-                start_date = item.replace('--start=', '')
-            if '--end' in item:
-                end_date = item.replace('--end=', '')
+        start_date = messages[1]
 
-        self.publisher.send_message(WORKLOG_QUEUE, Write_Worklog(promise_id, start_date, end_date).to_json())
+        self.publisher.send_message(WORKLOG_QUEUE, Write_Worklog(promise_id, start_date).to_json())

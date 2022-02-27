@@ -1,9 +1,11 @@
+import asyncio
 import sys
 import os
+import time
 import warnings
 import socket
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from modules.connections.outlook_connection import Outlook_Connection
 from modules.models.configuration import Configuration
@@ -12,7 +14,7 @@ from modules.rabbitmq.messages.api_controller import Api_Controller
 from modules.rabbitmq.messages.discord.send_message import Send_Message
 from modules.rabbitmq.messages.identificators import WORKLOG_QUEUE, DISCORD_QUEUE, OUTLOOK_QUEUE, \
     GET_NEXT_MEETING_MESSAGE
-from modules.rabbitmq.messages.outlook.create_task import *
+from modules.rabbitmq.messages.outlook.get_next_meeting import PROMISE_ID_PROPERTY
 from modules.rabbitmq.publisher import Publisher
 from modules.rabbitmq.receive import Consumer
 
@@ -43,24 +45,11 @@ def main():
     domain_login = f'{configuration.domain}\\{configuration.login}'
     outlook_connection = Outlook_Connection(configuration.outlook, configuration.email, domain_login, configuration.password)
 
-    def create_task_action(obj):
-        message: list[str] = []
-        promise_id = obj[PROMISE_ID_PROPERTY]
-        start_date = convert_rawdate_to_datetime(obj[START_DATE_PROPERTY])
-        name = obj[NAME_PROPERTY]
-        duration = obj[DURATION_PROPERTY]
-        issue_id = obj[ISSUE_ID_PROPERTY]
-        outlook_connection.create_task(name, start_date, duration, issue_id)
-        message.append('Task created.')
-        publisher.send_message(DISCORD_QUEUE, Send_Message(promise_id, '\n'.join(message)).to_json())
-
     def get_next_meeting(obj):
         promise_id = obj[PROMISE_ID_PROPERTY]
         start_time = datetime.utcnow()
-        end_time = start_time.replace(day=start_time.day + 2)
         start_time = start_time.replace(tzinfo=timezone.utc)
-        end_time = end_time.replace(tzinfo=timezone.utc)
-        meetings = outlook_connection.get_meeting(start_time, end_time)
+        meetings = outlook_connection.get_meeting(start_time)
         selected_meetings: list[Outlook_Meeting] = []
         for meeting in meetings:
             if start_time > meeting.start:
@@ -71,6 +60,10 @@ def main():
                 first_item = selected_meetings[0]
                 if first_item.start == meeting.start:
                     selected_meetings.append(meeting)
+
+        if len(selected_meetings) == 0:
+            publisher.send_message(DISCORD_QUEUE, Send_Message(promise_id, 'Not meetings today...').to_json())
+            return
 
         for meeting in selected_meetings:
             meeting_start_time = meeting.start.replace(hour=meeting.start.hour + 7)
@@ -84,8 +77,8 @@ def main():
             ]
             publisher.send_message(DISCORD_QUEUE, Send_Message(promise_id, '\n'.join(message)).to_json())
 
-    api_controller.configure(OUTLOOK_QUEUE, OUTLOOK_CREATE_TASK_MESSAGE, create_task_action)
     api_controller.configure(OUTLOOK_QUEUE, GET_NEXT_MEETING_MESSAGE, get_next_meeting)
+
     consumer.start()
 
 
@@ -94,3 +87,9 @@ if __name__ == '__main__':
     print('Starting')
     main()
     print('Started')
+
+    try:
+        while True:
+            time.sleep(1)
+    finally:
+        pass
