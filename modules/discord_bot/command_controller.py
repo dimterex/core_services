@@ -1,11 +1,14 @@
+NEXT_MEETING_COMMAND = 'next_meeting'
+WRITE_LOG_COMMAND = 'write'
+
+
 class Command_Controller:
     def __init__(self):
-        self.commands = []
+        self.commands = {}
 
-    def configure(self, action):
-        self.commands.append(action)
+    def configure(self, command: str, action):
+        self.commands[command] = action
 
-    def receive_message(self, promise_id: int, message: str):
-        for command in self.commands:
-            if message.startswith(command.command):
-                command.execute(promise_id, message)
+    def receive_message(self, command: str, promise_id: int, argumets: []):
+        if command in self.commands:
+            self.commands[command].execute(promise_id, argumets)

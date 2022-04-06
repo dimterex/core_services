@@ -6,7 +6,7 @@ PROMISE_ID_PROPERTY = 'promise_id'
 
 
 class Get_Next_Meeting:
-    def __init__(self, promise_id: str):
+    def __init__(self, promise_id: int):
         self.promise_id = promise_id
 
     def to_json(self):

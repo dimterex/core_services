@@ -2,10 +2,9 @@ import asyncio
 import os
 
 from modules.discord_bot.actions.get_next_meeting_action import Get_Next_Meeting_Action
-from modules.discord_bot.actions.help_action import Help_Action
 from modules.discord_bot.actions.write_worklog_action import Write_Worklog_Action
 from modules.discord_bot.discord_bot import Discord_Bot
-from modules.discord_bot.command_controller import Command_Controller
+from modules.discord_bot.command_controller import Command_Controller, NEXT_MEETING_COMMAND, WRITE_LOG_COMMAND
 from modules.rabbitmq.messages.api_controller import Api_Controller
 from modules.rabbitmq.messages.identificators import DISCORD_QUEUE, DISCORD_SEND_MESSAGE
 from modules.rabbitmq.publisher import Publisher
@@ -27,9 +26,8 @@ if __name__ == '__main__':
     consumer = Consumer(host, port, DISCORD_QUEUE, api_controller)
 
     command_controller = Command_Controller()
-    command_controller.configure(Help_Action(command_controller, publisher))
-    command_controller.configure(Write_Worklog_Action(publisher))
-    command_controller.configure(Get_Next_Meeting_Action(publisher))
+    command_controller.configure(WRITE_LOG_COMMAND, Write_Worklog_Action(publisher))
+    command_controller.configure(NEXT_MEETING_COMMAND, Get_Next_Meeting_Action(publisher))
 
     discord_Bot = Discord_Bot(command_controller, publisher)
 
