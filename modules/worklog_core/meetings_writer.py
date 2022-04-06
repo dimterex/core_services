@@ -3,8 +3,10 @@ from datetime import datetime
 from modules.connections.jira_connection import Jira_Connection
 from modules.connections.outlook_connection import Outlook_Connection
 from modules.models.configuration import Configuration
-from modules.worklog_core.helper import SECONDS_IN_HOUR
 from modules.worklog_core.services.worklog_service import Worklog_Service
+
+
+SECONDS_IN_HOUR = 3600
 
 
 class Worklog_by_Meetings:
@@ -21,6 +23,7 @@ class Worklog_by_Meetings:
         self.outlook = outlook
 
     def modify(self):
+        print('Worklog_by_Meetings. Starting modify')
         meetings = self.outlook.get_meeting(self.start_time)
 
         for calendar_item in meetings:
@@ -40,3 +43,4 @@ class Worklog_by_Meetings:
 
             self.worklog_service.add_worklog(calendar_item.name, calendar_item.start, category.jira_issue_id,
                                              difference.seconds / SECONDS_IN_HOUR)
+        print('Worklog_by_Meetings. Ending modify')

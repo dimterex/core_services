@@ -5,7 +5,6 @@ import dateutil.parser
 from modules.connections.jira_connection import Jira_Connection
 from modules.models.configuration import Configuration
 from modules.models.task_entry import Task_Entry
-from modules.worklog_core.helper import supported_day, NEEDS_HOURS
 from modules.worklog_core.services.worklog_service import Worklog_Service
 
 from todoist_api_python.api import TodoistAPI
@@ -14,6 +13,8 @@ from todoist_api_python.http_requests import get
 
 from modules.models.todoist_tasks import Todoist_Tasks
 
+
+NEEDS_HOURS = 8
 
 class Worklog_By_Tasks_v2:
     def __init__(self,
@@ -29,10 +30,7 @@ class Worklog_By_Tasks_v2:
         self.issue_tracker = issue_tracker
 
     def modify(self):
-        if not supported_day(self.start_time):
-            print('Not today.')
-            return
-
+        print('Worklog_By_Tasks_v2. Starting modify')
         completed_tasks = self.get_competed_tasks()
 
         if len(completed_tasks) == 0:
@@ -46,6 +44,7 @@ class Worklog_By_Tasks_v2:
         tasks_time = (NEEDS_HOURS - wrote_time) / len(completed_tasks)
         for task in completed_tasks:
             self.worklogs_service.add_worklog(task.name, self.start_time, f'{task.jira_issue}', tasks_time)
+        print('Worklog_By_Tasks_v2. Ending modify')
 
     def check_issues(self, tasks: list[Task_Entry]):
         for task in tasks:
@@ -71,11 +70,18 @@ class Worklog_By_Tasks_v2:
         correct_tasks = []
         for task in Todoist_Tasks(tasks).items:
             taskInfo = self.todoistAPI.get_task(task.task_id)
-            sectionInfo = self.todoistAPI.get_section(taskInfo.section_id)
+            if taskInfo.section_id == 0:
+                sectionInfo = self.todoistAPI.get_section(83787255)
+            else:
+                sectionInfo = self.todoistAPI.get_section(taskInfo.section_id)
+            # print('--------')
+            # print(taskInfo.content)
             if taskInfo.due is None:
                 continue
-
             date = dateutil.parser.parse(taskInfo.due.date)
+            # print(date.day, self.start_time.day)
+            # print(date.month, self.start_time.month)
+            # print(date.year, self.start_time.year)
             if date.day == self.start_time.day and date.month == self.start_time.month and date.year == self.start_time.year:
                 if len(taskInfo.label_ids) > 0:
                     label = self.todoistAPI.get_label(taskInfo.label_ids[0])

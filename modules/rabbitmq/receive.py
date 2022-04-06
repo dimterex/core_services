@@ -99,7 +99,9 @@ class ExampleConsumer(object):
 
     def on_message(self, _unused_channel, basic_deliver, properties, body):
         print('Rabbit received message # %s from %s: %s', basic_deliver.delivery_tag, properties.app_id, body)
-        self.apiController.received(body)
+        th = threading.Thread(target=() > self.apiController.received(body), name='on_message', daemon=True)
+        th.start()
+        # self.apiController.received(body)
 
     def stop_consuming(self):
         if self._channel:

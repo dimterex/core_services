@@ -20,6 +20,7 @@ from modules.models.configuration import Configuration
 from modules.worklog_core.services.worklog_service import Worklog_Service
 from modules.worklog_core.worklog_periodical import Worklog_By_Periodical
 from modules.worklog_core.worklog_tasks_v2 import Worklog_By_Tasks_v2
+from modules.worklog_core.write_worklog_action import Write_WorkLok_Action
 
 SETTINGS_FILE = 'settings.json'
 HOST_ENVIRON = 'RABBIT_HOST'
@@ -50,31 +51,14 @@ def main():
     jira_connection = Jira_Connection(configuration.jira, configuration.login, configuration.password)
     domain_login = f'{configuration.domain}\\{configuration.login}'
     outlook_connection = Outlook_Connection(configuration.outlook, configuration.email, domain_login, configuration.password)
-
     todoistApi = TodoistAPI(todoistToken)
+
+    write_WorkLok_Action = Write_WorkLok_Action(configuration, jira_connection, todoistApi, outlook_connection, publisher)
 
     def write_worklog_action(obj):
         promise_id = obj['promise_id']
         start_time = convert_rawdate_to_datetime(obj['start_day'])
-
-        start_time = start_time.replace(tzinfo=timezone.utc)
-
-        worklogs_service = Worklog_Service()
-        Worklog_by_Meetings(configuration, start_time, jira_connection, outlook_connection, worklogs_service).modify()
-        Worklog_By_Periodical(configuration, start_time, worklogs_service).modify()
-        Worklog_By_Tasks_v2(configuration, start_time, jira_connection, todoistApi, worklogs_service).modify()
-
-        message: list[str] = []
-        timelog = worklogs_service.get_summary()
-        message.append(f'Day: {start_time}')
-        for worklog in worklogs_service.worklogs:
-            url = f'{configuration.jira}/browse/{worklog.issue_id}'
-            message.append(f'\t {worklog.duration} | {url} | {worklog.name}')
-
-        message.append(f'\t Summary: {timelog}')
-
-        publisher.send_message(DISCORD_QUEUE, Send_Message(promise_id, '\n'.join(message)).to_json())
-        jira_connection.write_worklogs(worklogs_service.worklogs)
+        write_WorkLok_Action.write(promise_id, start_time)
 
     api_controller.configure(WORKLOG_QUEUE, WORKLOG_WRITE_MESSAGE, write_worklog_action)
 

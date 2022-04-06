@@ -2,7 +2,6 @@ from datetime import timedelta, datetime
 
 from modules.models.configuration import Configuration
 from modules.models.task_catogory import TasksCategory
-from modules.worklog_core.helper import supported_day
 from modules.worklog_core.services.worklog_service import Worklog_Service
 
 
@@ -16,10 +15,8 @@ class Worklog_By_Periodical:
         self.start_time = start_time
 
     def modify(self):
+        print('Worklog_By_Periodical. Starting modify')
         hours = 0.5
-
-        if not supported_day(self.start_time):
-            return
 
         for task in self.configuration.periodical:
             if task not in self.configuration.meetings_categories:
@@ -27,4 +24,4 @@ class Worklog_By_Periodical:
 
             category = self.configuration.meetings_categories[task]
             self.worklog_service.add_worklog(task.name, self.start_time.replace(hour=7), category.jira_issue_id, hours)
-
+        print('Worklog_By_Periodical. Ending modify')
