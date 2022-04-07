@@ -23,7 +23,7 @@ class ExampleConsumer(object):
         self._prefetch_count = 1
 
     def connect(self):
-        print('Connecting to %s', self._url)
+        print(f'Connecting to {self._url}')
         return pika.SelectConnection(
             parameters=pika.URLParameters(self._url),
             on_open_callback=self.on_connection_open,
@@ -43,7 +43,7 @@ class ExampleConsumer(object):
         self.open_channel()
 
     def on_connection_open_error(self, _unused_connection, err):
-        print('Connection open failed: %s', err)
+        print(f'Connection open failed: {err}')
         self.reconnect()
 
     def on_connection_closed(self, _unused_connection, reason):
@@ -51,7 +51,7 @@ class ExampleConsumer(object):
         if self._closing:
             self._connection.ioloop.stop()
         else:
-            print('Connection closed, reconnect necessary: %s', reason)
+            print(f'Connection closed, reconnect necessary: {reason}')
             self.reconnect()
 
     def reconnect(self):
@@ -73,18 +73,19 @@ class ExampleConsumer(object):
         self._channel.add_on_close_callback(self.on_channel_closed)
 
     def on_channel_closed(self, channel, reason):
-        print('Channel %i was closed: %s', channel, reason)
+        print(f'Channel {channel} was closed: {reason}')
         self.close_connection()
 
     def setup_queue(self, queue_name):
-        print('Declaring queue %s', queue_name)
+        print(f'Declaring queue {queue_name}')
         self._channel.queue_declare(queue=queue_name)
         self.start_consuming()
 
     def start_consuming(self):
         print('Issuing consumer related RPC commands')
         self.add_on_cancel_callback()
-        self._consumer_tag = self._channel.basic_consume(self.queue, self.on_message, auto_ack=True)
+        on_message_callback = functools.partial(self.on_message, args=(self._connection))
+        self._consumer_tag = self._channel.basic_consume(self.queue, on_message_callback)
         self.was_consuming = True
         self._consuming = True
 
@@ -93,15 +94,34 @@ class ExampleConsumer(object):
         self._channel.add_on_cancel_callback(self.on_consumer_cancelled)
 
     def on_consumer_cancelled(self, method_frame):
-        print('Consumer was cancelled remotely, shutting down: %r', method_frame)
+        print(f'Consumer was cancelled remotely, shutting down: {method_frame}')
         if self._channel:
             self._channel.close()
 
-    def on_message(self, _unused_channel, basic_deliver, properties, body):
-        print('Rabbit received message # %s from %s: %s', basic_deliver.delivery_tag, properties.app_id, body)
-        th = threading.Thread(target=() > self.apiController.received(body), name='on_message', daemon=True)
-        th.start()
-        # self.apiController.received(body)
+    def ack_message(self, ch, delivery_tag):
+        """Note that `ch` must be the same pika channel instance via which
+        the message being ACKed was retrieved (AMQP protocol constraint).
+        """
+        if ch.is_open:
+            ch.basic_ack(delivery_tag)
+            print(f'Send ask for {delivery_tag}')
+        else:
+            # Channel is already closed, so we can't ACK this message;
+            # log and/or do something that makes sense for your app in this case.
+            print(f'We cant ACK {delivery_tag} message')
+            pass
+
+    def do_work(self, conn, ch, delivery_tag, body):
+        thread_id = threading.get_ident()
+        print(f'Thread id: {thread_id} Delivery tag: {delivery_tag} Message body: {body}')
+        self.apiController.received(body)
+        self.ack_message(ch, delivery_tag)
+
+    def on_message(self, ch, method_frame, _header_frame, body, args):
+        (conn) = args
+        delivery_tag = method_frame.delivery_tag
+        t = threading.Thread(target=self.do_work, args=(conn, ch, delivery_tag, body))
+        t.start()
 
     def stop_consuming(self):
         if self._channel:
@@ -112,9 +132,7 @@ class ExampleConsumer(object):
 
     def on_cancelok(self, _unused_frame, userdata):
         self._consuming = False
-        print(
-            'RabbitMQ acknowledged the cancellation of the consumer: %s',
-            userdata)
+        print(f'RabbitMQ acknowledged the cancellation of the consumer: {userdata}')
         self.close_channel()
 
     def close_channel(self):
@@ -158,7 +176,7 @@ class ReconnectingExampleConsumer(object):
         if self._consumer.should_reconnect:
             self._consumer.stop()
             reconnect_delay = self._get_reconnect_delay()
-            print('Reconnecting after %d seconds', reconnect_delay)
+            print(f'Reconnecting after {reconnect_delay} seconds')
             time.sleep(reconnect_delay)
             self._consumer = ExampleConsumer(self._amqp_url, self.queue, self.apiController)
 
