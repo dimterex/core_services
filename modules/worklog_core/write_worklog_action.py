@@ -7,6 +7,7 @@ from todoist_api_python.api import TodoistAPI
 from modules.connections.jira_connection import Jira_Connection
 from modules.connections.outlook_connection import Outlook_Connection
 from modules.models.configuration import Configuration
+from modules.models.log_service import Logger_Service, DEBUG_LOG_LEVEL
 from modules.rabbitmq.messages.discord.send_message import Send_Message
 from modules.rabbitmq.messages.identificators import DISCORD_QUEUE
 from modules.rabbitmq.publisher import Publisher
@@ -22,7 +23,9 @@ class Write_WorkLok_Action:
                  issue_tracker: Jira_Connection,
                  todoistAPI: TodoistAPI,
                  outlook: Outlook_Connection,
-                 publisher: Publisher):
+                 publisher: Publisher,
+                 logger_service: Logger_Service):
+        self.logger_service = logger_service
         self.publisher = publisher
         self.todoistAPI = todoistAPI
         self.configuration = configuration
@@ -33,15 +36,15 @@ class Write_WorkLok_Action:
         self.write_sync(promise_id, start_time)
 
     def write_sync(self, promise_id: str, start_time: datetime.datetime):
-        print('Write_WorkLok_Action. Starting')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Starting modify')
         start_time = start_time.replace(tzinfo=datetime.timezone.utc)
 
         worklogs_service = Worklog_Service()
-        Worklog_by_Meetings(self.configuration, start_time, self.issue_tracker, self.outlook, worklogs_service).modify()
-        Worklog_By_Periodical(self.configuration, start_time, worklogs_service).modify()
-        Worklog_By_Tasks_v2(self.configuration, start_time, self.issue_tracker, self.todoistAPI, worklogs_service).modify()
+        Worklog_by_Meetings(self.configuration, start_time, self.issue_tracker, self.outlook, worklogs_service, self.logger_service).modify()
+        Worklog_By_Periodical(self.configuration, start_time, worklogs_service, self.logger_service).modify()
+        Worklog_By_Tasks_v2(self.configuration, start_time, self.issue_tracker, self.todoistAPI, worklogs_service, self.logger_service).modify()
 
-        print('Write_WorkLok_Action. Prepare tasks ...')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Prepare tasks ...')
         message: list[str] = []
         timelog = worklogs_service.get_summary()
         message.append(f'Day: {start_time}')
@@ -51,8 +54,10 @@ class Write_WorkLok_Action:
 
         message.append(f'\t Summary: {timelog}')
 
-        print('Write_WorkLok_Action. Send result message')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Send result message')
         self.publisher.send_message(DISCORD_QUEUE, Send_Message(promise_id, '\n'.join(message)).to_json())
-        print('Write_WorkLok_Action. Write worklog')
+
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Write worklog')
         self.issue_tracker.write_worklogs(worklogs_service.worklogs)
-        print('Write_WorkLok_Action. Ended')
+
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Ended')

@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="log.ts"></script>
+    <script src="main.ts"></script>
+    <title>Logger</title> 
+
+    </head>
+<body>
+<ul>
+    {% for project in results %}
+        <li> <a href="{{ project }}">{{ project }}</a></li>
+    {% endfor %}
+</ul>
+</body>
+</html>

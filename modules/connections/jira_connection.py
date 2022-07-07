@@ -1,10 +1,12 @@
 from jira import JIRA
 
+from modules.models.log_service import Logger_Service, DEBUG_LOG_LEVEL
 from modules.models.worklog import Worklog
 
 
 class Jira_Connection:
-    def __init__(self, url: str, login: str, password: str):
+    def __init__(self, url: str, login: str, password: str, logger_service: Logger_Service):
+        self.logger_service = logger_service
         self.jira_options = {
             'server': url,
             'verify': False,
@@ -13,20 +15,19 @@ class Jira_Connection:
         self.password = password
 
     def write_worklogs(self, worklogs: list[Worklog]):
-        print('Connecting to jira for write worklogs...')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Connecting to jira for write worklogs...')
         jira = JIRA(basic_auth=(self.login, self.password), options=self.jira_options)
-        print('Connected to jira for write worklogs...')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Connected to jira for write worklogs...')
         for worklog in worklogs:
             jira.add_worklog(worklog.issue_id, timeSpent=f'{worklog.duration}', started=worklog.date, comment=worklog.name)
         jira.close()
-        print('Disconnected to jira for write worklogs...')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Disconnected to jira for write worklogs...')
 
     def create_subtask(self, name: str, parent_issue_id: str):
-        print('Connecting to jira for create subtask...')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Connecting to jira for create subtask...')
         jira = JIRA(basic_auth=(self.login, self.password), options=self.jira_options)
-        print('Connected to jira for create subtask...')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Connected to jira for create subtask...')
         issue = jira.issue(parent_issue_id)
-
         try:
             result = jira.create_issue(project={'key': issue.fields.project.key},
                                        summary=name,
@@ -43,9 +44,9 @@ class Jira_Connection:
                                        parent={'key': parent_issue_id})
 
         jira.close()
-        print('Disconnected to jira for create subtask...')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Disconnected to jira for create subtask...')
         return result
 
-
-
-
+    def test(self):
+        jira = JIRA(basic_auth=(self.login, self.password), options=self.jira_options)
+        pass

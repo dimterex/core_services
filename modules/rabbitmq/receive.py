@@ -4,12 +4,14 @@ import time
 
 import pika
 
-
+from modules.models.log_service import Logger_Service, INFO_LOG_LEVEL, DEBUG_LOG_LEVEL, ERROR_LOG_LEVEL, \
+    WARNING_LOG_LEVEL
 from modules.rabbitmq.messages.api_controller import Api_Controller
 
 class ExampleConsumer(object):
 
-    def __init__(self, amqp_url, queue, apiController: Api_Controller):
+    def __init__(self, amqp_url, queue, apiController: Api_Controller, logger_service: Logger_Service):
+        self.logger_service = logger_service
         self.apiController = apiController
         self.should_reconnect = False
         self.was_consuming = False
@@ -23,7 +25,7 @@ class ExampleConsumer(object):
         self._prefetch_count = 1
 
     def connect(self):
-        print(f'Connecting to {self._url}')
+        self.logger_service.send_log(INFO_LOG_LEVEL, self.__class__.__name__, f'Connecting to {self._url}')
         return pika.SelectConnection(
             parameters=pika.URLParameters(self._url),
             on_open_callback=self.on_connection_open,
@@ -33,17 +35,17 @@ class ExampleConsumer(object):
     def close_connection(self):
         self._consuming = False
         if self._connection.is_closing or self._connection.is_closed:
-            print('Connection is closing or already closed')
+            self.logger_service.send_log(INFO_LOG_LEVEL, self.__class__.__name__, 'Connection is closing or already closed')
         else:
-            print('Closing connection')
+            self.logger_service.send_log(INFO_LOG_LEVEL, self.__class__.__name__, 'Closing connection')
             self._connection.close()
 
     def on_connection_open(self, _unused_connection):
-        print('Connection opened')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Connection opened')
         self.open_channel()
 
     def on_connection_open_error(self, _unused_connection, err):
-        print(f'Connection open failed: {err}')
+        self.logger_service.send_log(ERROR_LOG_LEVEL, self.__class__.__name__, f'Connection open failed: {err}')
         self.reconnect()
 
     def on_connection_closed(self, _unused_connection, reason):
@@ -51,7 +53,7 @@ class ExampleConsumer(object):
         if self._closing:
             self._connection.ioloop.stop()
         else:
-            print(f'Connection closed, reconnect necessary: {reason}')
+            self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, f'Connection closed, reconnect necessary: {reason}')
             self.reconnect()
 
     def reconnect(self):
@@ -59,30 +61,30 @@ class ExampleConsumer(object):
         self.stop()
 
     def open_channel(self):
-        print('Creating a new channel')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Creating a new channel')
         self._connection.channel(on_open_callback=self.on_channel_open)
 
     def on_channel_open(self, channel):
-        print('Channel opened')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Channel opened')
         self._channel = channel
         self.add_on_channel_close_callback()
         self.setup_queue(self.queue)
 
     def add_on_channel_close_callback(self):
-        print('Adding channel close callback')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Adding channel close callback')
         self._channel.add_on_close_callback(self.on_channel_closed)
 
     def on_channel_closed(self, channel, reason):
-        print(f'Channel {channel} was closed: {reason}')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, f'Channel {channel} was closed: {reason}')
         self.close_connection()
 
     def setup_queue(self, queue_name):
-        print(f'Declaring queue {queue_name}')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, f'Declaring queue {queue_name}')
         self._channel.queue_declare(queue=queue_name)
         self.start_consuming()
 
     def start_consuming(self):
-        print('Issuing consumer related RPC commands')
+        self.logger_service.send_log(INFO_LOG_LEVEL, self.__class__.__name__, 'Issuing consumer related RPC commands')
         self.add_on_cancel_callback()
         on_message_callback = functools.partial(self.on_message, args=(self._connection))
         self._consumer_tag = self._channel.basic_consume(self.queue, on_message_callback)
@@ -90,11 +92,11 @@ class ExampleConsumer(object):
         self._consuming = True
 
     def add_on_cancel_callback(self):
-        print('Adding consumer cancellation callback')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Adding consumer cancellation callback')
         self._channel.add_on_cancel_callback(self.on_consumer_cancelled)
 
     def on_consumer_cancelled(self, method_frame):
-        print(f'Consumer was cancelled remotely, shutting down: {method_frame}')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, f'Consumer was cancelled remotely, shutting down: {method_frame}')
         if self._channel:
             self._channel.close()
 
@@ -104,17 +106,18 @@ class ExampleConsumer(object):
         """
         if ch.is_open:
             ch.basic_ack(delivery_tag)
-            print(f'Send ask for {delivery_tag}')
+            self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, f'Send ask for {delivery_tag}')
         else:
             # Channel is already closed, so we can't ACK this message;
             # log and/or do something that makes sense for your app in this case.
-            print(f'We cant ACK {delivery_tag} message')
+            self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, f'We cant ACK {delivery_tag} message')
             pass
 
     def do_work(self, conn, ch, delivery_tag, body):
         thread_id = threading.get_ident()
-        print(f'Thread id: {thread_id} Delivery tag: {delivery_tag} Message body: {body}')
-        self.apiController.received(body)
+        raw_body = body.decode()
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, f'Thread id: {thread_id} Delivery tag: {delivery_tag} Message body: {raw_body}')
+        self.apiController.received(raw_body)
         self.ack_message(ch, delivery_tag)
 
     def on_message(self, ch, method_frame, _header_frame, body, args):
@@ -125,18 +128,18 @@ class ExampleConsumer(object):
 
     def stop_consuming(self):
         if self._channel:
-            print('Sending a Basic.Cancel RPC command to RabbitMQ')
+            self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Sending a Basic.Cancel RPC command to RabbitMQ')
             cb = functools.partial(
                 self.on_cancelok, userdata=self._consumer_tag)
             self._channel.basic_cancel(self._consumer_tag, cb)
 
     def on_cancelok(self, _unused_frame, userdata):
         self._consuming = False
-        print(f'RabbitMQ acknowledged the cancellation of the consumer: {userdata}')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, f'RabbitMQ acknowledged the cancellation of the consumer: {userdata}')
         self.close_channel()
 
     def close_channel(self):
-        print('Closing the channel')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Closing the channel')
         self._channel.close()
 
     def run(self):
@@ -146,22 +149,23 @@ class ExampleConsumer(object):
     def stop(self):
         if not self._closing:
             self._closing = True
-            print('Stopping')
+            self.logger_service.send_log(INFO_LOG_LEVEL, self.__class__.__name__, 'Stopping')
             if self._consuming:
                 self.stop_consuming()
                 self._connection.ioloop.start()
             else:
                 self._connection.ioloop.stop()
-            print('Stopped')
+            self.logger_service.send_log(INFO_LOG_LEVEL, self.__class__.__name__, 'Stopped')
 
 
 class ReconnectingExampleConsumer(object):
-    def __init__(self, amqp_url, queue, apiController: Api_Controller):
+    def __init__(self, amqp_url, queue, apiController: Api_Controller, logger_service: Logger_Service):
+        self.logger_service = logger_service
         self.apiController = apiController
         self._reconnect_delay = 0
         self._amqp_url = amqp_url
         self.queue = queue
-        self._consumer = ExampleConsumer(self._amqp_url, self.queue, self.apiController)
+        self._consumer = ExampleConsumer(self._amqp_url, self.queue, self.apiController, self.logger_service)
 
     def run(self):
         while True:
@@ -176,9 +180,9 @@ class ReconnectingExampleConsumer(object):
         if self._consumer.should_reconnect:
             self._consumer.stop()
             reconnect_delay = self._get_reconnect_delay()
-            print(f'Reconnecting after {reconnect_delay} seconds')
+            self.logger_service.send_log(WARNING_LOG_LEVEL, self.__class__.__name__, f'Reconnecting after {reconnect_delay} seconds')
             time.sleep(reconnect_delay)
-            self._consumer = ExampleConsumer(self._amqp_url, self.queue, self.apiController)
+            self._consumer = ExampleConsumer(self._amqp_url, self.queue, self.apiController, self.logger_service)
 
     def _get_reconnect_delay(self):
         if self._consumer.was_consuming:
@@ -191,16 +195,15 @@ class ReconnectingExampleConsumer(object):
     
 
 class Consumer:
-    def __init__(self, host: str, port: int, queue: str, api_controller: Api_Controller):
-        self.port = port
-        self.host = host
-        self.amqp_url = f'amqp://guest:guest@{self.host}:{self.port}'
+    def __init__(self, amqp_url: str, queue: str, api_controller: Api_Controller, logger_service: Logger_Service):
+        self.logger_service = logger_service
+        self.amqp_url = amqp_url
         self.queue = queue
         self.api_controller = api_controller
 
     def start(self):
         def run():
-            consumer = ReconnectingExampleConsumer(self.amqp_url, self.queue, self.api_controller)
+            consumer = ReconnectingExampleConsumer(self.amqp_url, self.queue, self.api_controller, self.logger_service)
             consumer.run()
 
         th = threading.Thread(target=run, name='receive', daemon=True)

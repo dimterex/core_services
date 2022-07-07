@@ -9,11 +9,12 @@ from datetime import datetime, timezone, timedelta
 
 from modules.connections.outlook_connection import Outlook_Connection
 from modules.models.configuration import Configuration
+from modules.models.log_service import Logger_Service
 from modules.models.outlook_meeting import Outlook_Meeting
 from modules.rabbitmq.messages.api_controller import Api_Controller
 from modules.rabbitmq.messages.discord.send_message import Send_Message
 from modules.rabbitmq.messages.identificators import WORKLOG_QUEUE, DISCORD_QUEUE, OUTLOOK_QUEUE, \
-    GET_NEXT_MEETING_MESSAGE
+    GET_NEXT_MEETING_MESSAGE, LOGGER_QUEUE
 from modules.rabbitmq.messages.outlook.get_next_meeting import PROMISE_ID_PROPERTY
 from modules.rabbitmq.publisher import Publisher
 from modules.rabbitmq.receive import Consumer
@@ -29,21 +30,28 @@ def convert_rawdate_to_datetime(raw_date: str):
 
 
 def main():
-    host = socket.gethostbyname(os.environ[HOST_ENVIRON])
+    # host = socket.gethostbyname(os.environ[HOST_ENVIRON])
+    host = os.environ[HOST_ENVIRON]
     raw_port = os.environ[PORT_ENVIRON]
     port = int(raw_port)
 
-    api_controller = Api_Controller()
-    publisher = Publisher(host, port)
-    consumer = Consumer(host, port, OUTLOOK_QUEUE, api_controller)
+    logger_service = Logger_Service('Outlook_Application')
+    api_controller = Api_Controller(logger_service)
+    ampq_url = f'amqp://guest:guest@{host}:{port}'
+    publisher = Publisher(ampq_url)
+    consumer = Consumer(ampq_url, OUTLOOK_QUEUE, api_controller, logger_service)
 
-    configuration = None
+    def send_log(log_message):
+        publisher.send_message(LOGGER_QUEUE, log_message.to_json())
+
+    logger_service.configure_action(send_log)
+
     with open(SETTINGS_FILE, 'r', encoding='utf8') as json_file:
         raw_data = json_file.read()
         configuration = Configuration(raw_data)
 
     domain_login = f'{configuration.domain}\\{configuration.login}'
-    outlook_connection = Outlook_Connection(configuration.outlook, configuration.email, domain_login, configuration.password)
+    outlook_connection = Outlook_Connection(configuration.outlook, configuration.email, domain_login, configuration.password, logger_service)
 
     def get_next_meeting(obj):
         promise_id = obj[PROMISE_ID_PROPERTY]

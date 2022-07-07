@@ -3,6 +3,7 @@ from datetime import datetime
 from modules.connections.jira_connection import Jira_Connection
 from modules.connections.outlook_connection import Outlook_Connection
 from modules.models.configuration import Configuration
+from modules.models.log_service import Logger_Service, DEBUG_LOG_LEVEL
 from modules.worklog_core.services.worklog_service import Worklog_Service
 
 
@@ -15,7 +16,9 @@ class Worklog_by_Meetings:
                  start_time: datetime,
                  issue_tracker: Jira_Connection,
                  outlook: Outlook_Connection,
-                 worklog_service: Worklog_Service):
+                 worklog_service: Worklog_Service,
+                 logger_service: Logger_Service):
+        self.logger_service = logger_service
         self.worklog_service = worklog_service
         self.configuration = configuration
         self.start_time = start_time
@@ -23,7 +26,7 @@ class Worklog_by_Meetings:
         self.outlook = outlook
 
     def modify(self):
-        print('Worklog_by_Meetings. Starting modify')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Starting modify')
         meetings = self.outlook.get_meeting(self.start_time)
 
         for calendar_item in meetings:
@@ -43,4 +46,4 @@ class Worklog_by_Meetings:
 
             self.worklog_service.add_worklog(calendar_item.name, calendar_item.start, category.jira_issue_id,
                                              difference.seconds / SECONDS_IN_HOUR)
-        print('Worklog_by_Meetings. Ending modify')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Ending modify')

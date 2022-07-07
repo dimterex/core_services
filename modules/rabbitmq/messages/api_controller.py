@@ -1,9 +1,12 @@
 import json
 
+from modules.models.log_service import Logger_Service, ERROR_LOG_LEVEL, TRACE_LOG_LEVEL
+
 
 class Api_Controller:
 
-    def __init__(self):
+    def __init__(self, logger_service: Logger_Service):
+        self.logger_service = logger_service
         self.type_to_queue = []
         self.handlers = []
 
@@ -35,16 +38,20 @@ class Api_Controller:
     def received(self, message: str):
         if message is None:
             return
-        obj = json.loads(message)
-        type = obj['type']
-        payload = obj['value']
+        try:
+            self.logger_service.send_log(TRACE_LOG_LEVEL, self.__class__.__name__, message)
+            obj = json.loads(message)
+            type = obj['type']
+            payload = obj['value']
 
-        type_handlers = None
-        if len(self.handlers) != 0:
-            type_handlers = next(x for x in self.handlers if x.type == type)
+            type_handlers = None
+            if len(self.handlers) != 0:
+                type_handlers = next(x for x in self.handlers if x.type == type)
 
-        if type_handlers is not None:
-            type_handlers.execute(payload)
+            if type_handlers is not None:
+                type_handlers.execute(payload)
+        except Exception as e:
+            self.logger_service.send_log(ERROR_LOG_LEVEL, self.__class__.__name__, f'Cant parse message: {e}; \n {message}')
 
 
 class Type_To_Queue_Mapper:

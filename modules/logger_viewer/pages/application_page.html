@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="log.ts"></script>
+    <script src="main.ts"></script>
+    <title>Logger</title> 
+
+    <script type="text/javascript">
+    function load() {
+        var log_list = document.getElementById("log_list");
+        var application_name = location.pathname.replace('/', '');
+        console.log(application_name);
+
+        socket = new WebSocket("ws://" + getHost() + ":{{ websocket_port }}");
+
+        socket.onopen = function () {
+            console.log("Соединение установлено.");
+        };
+
+        socket.onclose = function (event) {
+            if (event.wasClean) {
+                console.log('Соединение закрыто чисто');
+            } else {
+                console.log('Обрыв соединения'); // например, "убит" процесс сервера
+            }
+            console.log('Код: ' + event.code + ' причина: ' + event.reason);
+        };
+
+        socket.onmessage = function (event) {
+            var logNode = document.createElement("tr");
+            var logMessage = getLogMessage(event.data);
+
+            if (logMessage.applicationName != application_name){
+                return;
+            }
+             console.log(logMessage.applicationName);
+            var datetimeNode = document.createElement("td");
+            datetimeNode.innerText = logMessage.datetime;
+
+            var levelNode = document.createElement("td");
+            levelNode.innerText = logMessage.level;
+
+            var tagNode = document.createElement("td");
+            tagNode.innerText = logMessage.tag;
+
+            var messageNode = document.createElement("td");
+            messageNode.innerText = logMessage.message;
+
+            logNode.appendChild(datetimeNode);
+            logNode.appendChild(levelNode);
+            logNode.appendChild(tagNode);
+            logNode.appendChild(messageNode);
+            log_list.appendChild(logNode)
+        };
+
+        socket.onerror = function (error) {
+            console.log(error);
+        };
+    }
+
+    function getHost() {
+        return location.hostname;
+    }
+
+    function getLogMessage(rawJson) {
+        var logMessage = JSON.parse(rawJson);
+        return logMessage;
+    }
+
+    var socket = null;
+
+    function unload() {
+        if (socket) {
+            socket.close();
+            socket = null;
+        }
+    }
+
+    </script>
+    </head>
+<body onunload="unload()" onload="load()">
+<ul>
+    <li>error</li>
+    <li>debug</li>
+    <li>info</li>
+    <li>...</li>
+</ul>
+
+<table style="width: 100%; border-collapse: collapse; float: left;" border="1">
+    <thead> 
+    <tr>
+        <td>Date time</td> 
+        <td>Log level</td> 
+        <td>Tag</td> 
+        <td>Message</td> 
+        </tr> 
+    </thead> 
+    <tbody id="log_list"> 
+    {% for log in results %} 
+        <tr> 
+            <td>{{ log.datetime }}</td>
+            <td>{{ log.level }}</td>
+            <td>{{ log.tag }}</td>
+            <td>{{ log.message }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+</body>
+</html>

@@ -4,6 +4,7 @@ import dateutil.parser
 
 from modules.connections.jira_connection import Jira_Connection
 from modules.models.configuration import Configuration
+from modules.models.log_service import Logger_Service, DEBUG_LOG_LEVEL, INFO_LOG_LEVEL, TRACE_LOG_LEVEL
 from modules.models.task_entry import Task_Entry
 from modules.worklog_core.services.worklog_service import Worklog_Service
 
@@ -22,7 +23,9 @@ class Worklog_By_Tasks_v2:
                  start_time: datetime,
                  issue_tracker: Jira_Connection,
                  todoistAPI: TodoistAPI,
-                 worklog_service: Worklog_Service):
+                 worklog_service: Worklog_Service,
+                 logger_service: Logger_Service):
+        self.logger_service = logger_service
         self.todoistAPI = todoistAPI
         self.worklogs_service = worklog_service
         self.configuration = configuration
@@ -30,11 +33,11 @@ class Worklog_By_Tasks_v2:
         self.issue_tracker = issue_tracker
 
     def modify(self):
-        print('Worklog_By_Tasks_v2. Starting modify')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Starting modify')
         completed_tasks = self.get_competed_tasks()
 
         if len(completed_tasks) == 0:
-            print('Not tasks.')
+            self.logger_service.send_log(INFO_LOG_LEVEL, self.__class__.__name__, 'Not tasks.')
             return
 
         self.check_issues(completed_tasks)
@@ -44,7 +47,7 @@ class Worklog_By_Tasks_v2:
         tasks_time = (NEEDS_HOURS - wrote_time) / len(completed_tasks)
         for task in completed_tasks:
             self.worklogs_service.add_worklog(task.name, self.start_time, f'{task.jira_issue}', tasks_time)
-        print('Worklog_By_Tasks_v2. Ending modify')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Ending modify')
 
     def check_issues(self, tasks: list[Task_Entry]):
         for task in tasks:
@@ -74,14 +77,10 @@ class Worklog_By_Tasks_v2:
                 sectionInfo = self.todoistAPI.get_section(83787255)
             else:
                 sectionInfo = self.todoistAPI.get_section(taskInfo.section_id)
-            # print('--------')
-            # print(taskInfo.content)
             if taskInfo.due is None:
                 continue
             date = dateutil.parser.parse(taskInfo.due.date)
-            # print(date.day, self.start_time.day)
-            # print(date.month, self.start_time.month)
-            # print(date.year, self.start_time.year)
+
             if date.day == self.start_time.day and date.month == self.start_time.month and date.year == self.start_time.year:
                 if len(taskInfo.label_ids) > 0:
                     label = self.todoistAPI.get_label(taskInfo.label_ids[0])

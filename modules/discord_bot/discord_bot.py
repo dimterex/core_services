@@ -3,11 +3,13 @@ from threading import Thread
 from discord.ext import commands
 
 from modules.discord_bot.command_controller import Command_Controller, NEXT_MEETING_COMMAND, WRITE_LOG_COMMAND
+from modules.models.log_service import Logger_Service, DEBUG_LOG_LEVEL, INFO_LOG_LEVEL, WARNING_LOG_LEVEL
 from modules.rabbitmq.publisher import Publisher
 
 
 class Discord_Bot():
-    def __init__(self, command_controller: Command_Controller, publisher: Publisher):
+    def __init__(self, command_controller: Command_Controller, publisher: Publisher, logger_service: Logger_Service):
+        self.logger_service = logger_service
         self.publisher = publisher
         self.command_controller = command_controller
         self.promises = {}
@@ -20,7 +22,7 @@ class Discord_Bot():
 
         @self.bot.event
         async def on_ready():
-            print('We have logged in as {0.user}'.format(self.bot))
+            self.logger_service.send_log(INFO_LOG_LEVEL, self.__class__.__name__, f'We have logged in as {self.bot.user}')
 
         @self.bot.event
         async def on_command_error(ctx, error):
@@ -28,6 +30,7 @@ class Discord_Bot():
 
         @self.bot.event
         async def on_message(message):
+            logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, f'Receive message: {message}')
             await self.bot.process_commands(message)
 
         @self.bot.command(name=NEXT_MEETING_COMMAND, help="Get next meeting", usage="Without any arguments", description="description")
@@ -49,10 +52,10 @@ class Discord_Bot():
                 self.bot.loop.create_task(channel.send(message))
             self.promises.pop(promise_id)
         else:
-            print(f'Cant send promise: {promise_id}; message: {message}')
+            self.logger_service.send_log(WARNING_LOG_LEVEL, self.__class__.__name__, f'Cant send promise: {promise_id}; message: {message}')
 
     def initialize(self, token: str):
-        print('Discord_Bot started.')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Starting...')
 
         def run():
             self.bot.start(token)
@@ -60,4 +63,4 @@ class Discord_Bot():
         th = Thread(target=run, name='discord', daemon=True)
         th.start()
 
-        print('Discord_Bot starting.')
+        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Started.')
