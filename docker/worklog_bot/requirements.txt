@@ -1,5 +1,0 @@
-pika
-exchangelib
-jira
-python-dateutil
-todoist_api_python
