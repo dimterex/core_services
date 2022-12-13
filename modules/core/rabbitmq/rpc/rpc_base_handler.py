@@ -1,6 +1,9 @@
+from modules.core.rabbitmq.messages.status_response import StatusResponse
+
+
 class RpcBaseHandler:
     def get_message_type(self) -> str:
-        pass
+        raise Exception('Not implemented')
 
-    def execute(self, payload) -> str:
-        pass
+    def execute(self, payload) -> StatusResponse:
+        raise Exception('Not implemented')

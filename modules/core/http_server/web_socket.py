@@ -47,9 +47,8 @@ class WebSocketService:
 
     def send_message(self, external_promise_id: int, message: str):
         print(external_promise_id)
-        client = self.promises[external_promise_id]
-        print(client)
-        if client is not None:
+        if external_promise_id in self.promises:
+            client = self.promises[external_promise_id]
             self.server.send_message(client, message)
         else:
             self.server.send_message_to_all(message)

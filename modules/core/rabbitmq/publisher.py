@@ -10,4 +10,3 @@ class Publisher:
         channel.queue_declare(queue=queue)
         channel.basic_publish(exchange='', routing_key=queue, body=message)
         connection.close()
-

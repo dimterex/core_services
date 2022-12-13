@@ -5,6 +5,7 @@ import warnings
 from todoist_api_python.api import TodoistAPI
 
 from modules.core.rabbitmq.messages.identificators import TODOIST_QUEUE, LOGGER_QUEUE
+from modules.core.rabbitmq.messages.logger.log_message import Log_Message
 from modules.core.rabbitmq.publisher import Publisher
 from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
 from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
@@ -29,7 +30,8 @@ def main():
 
     logger_service = Logger_Service('Todoist_application')
     publisher = Publisher(ampq_url)
-    def send_log(log_message):
+
+    def send_log(log_message: Log_Message):
         publisher.send_message(LOGGER_QUEUE, log_message.to_json())
 
     logger_service.configure_action(send_log)

@@ -13,24 +13,7 @@ class GetCompletedTasksResponse:
         self.issues = issues
 
     def to_json(self):
-        issues = []
-        for issue in self.issues:
-            rawIssue = []
-            rawIssue.append('{')
-            rawIssue.append(f'"name": "{issue.name}",')
-            rawIssue.append(f'"category": "{issue.category}",')
-            rawIssue.append(f'"tracker_id": "{issue.jira_issue}",')
-            rawIssue.append(f'"id": "{issue.id}"')
-            rawIssue.append('}')
-            issues.append(''.join(rawIssue))
-
-        rawIssues = ','.join(issues)
-        rawIssues = f'[{rawIssues}]'
-
         dict_object = {
-            MESSAGE_TYPE: GET_COMPLETED_TASK_RESPONSE_MESSAGE_TYPE,
-            MESSAGE_PAYLOAD: {
-                GET_COMPLETED_TASK_RESPONSE_ISSUES_PROPERTY: rawIssues
-            }
+            GET_COMPLETED_TASK_RESPONSE_ISSUES_PROPERTY: self.issues
         }
         return json.dumps(dict_object)

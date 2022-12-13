@@ -15,9 +15,6 @@ from modules.core.rabbitmq.receive import Consumer
 from modules.core.http_server.resource_executor import ResourceExecutor
 from modules.core.http_server.template_page_executor import TemplatePageExecutor
 
-PORT_ENVIRON = 'PORT'
-WEBSOCKET_PORT_ENVIRON = 'WEBSOCKET_PORT'
-
 RABBIT_HOST_ENVIRON = 'RABBIT_HOST'
 RABBIT_PORT_ENVIRON = 'RABBIT_PORT'
 TEMPLATES_FOLDER_ENVIRON = 'TEMPLATES'
@@ -25,17 +22,11 @@ STORAGE_FOLDER_ENVIRON = 'STORAGE'
 
 
 def main():
-    raw_port = os.environ[PORT_ENVIRON]
-    service_port = int(raw_port)
-
     host = os.environ[RABBIT_HOST_ENVIRON]
     templates = os.environ[TEMPLATES_FOLDER_ENVIRON]
     storage = os.environ[STORAGE_FOLDER_ENVIRON]
     raw_port = os.environ[RABBIT_PORT_ENVIRON]
     port = int(raw_port)
-
-    raw_port = os.environ[WEBSOCKET_PORT_ENVIRON]
-    websocket_port = int(raw_port)
 
     logger_service = Logger_Service('LogViewer_Application')
     api_controller = Api_Controller(logger_service)
@@ -60,9 +51,9 @@ def main():
     consumer.start()
 
     hostname = '0.0.0.0'
-
+    websocket_port = 6788
     ws = WebSocketService(hostname, websocket_port)
-    httpServer = CoreHttpServer(service_port, logger_service)
+    httpServer = CoreHttpServer(6789, logger_service)
     for dp, dn, filenames in os.walk(templates):
         for f in filenames:
             full_path = os.path.join(dp, f)

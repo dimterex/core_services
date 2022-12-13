@@ -1,12 +1,11 @@
 import datetime
+import json
 
 from discord_bot.bot.discord_bot import Discord_Bot
 from modules.core.rabbitmq.messages.identificators import OUTLOOK_QUEUE, MESSAGE_PAYLOAD
 from modules.core.helpers.helper import convert_rawdate_to_datetime, convert_rawdate_with_timezone_to_datetime
 
 from modules.core.rabbitmq.messages.outlook.get_events_by_date_request import GetEventsByDateRequest
-from modules.core.rabbitmq.messages.outlook.get_events_by_date_response import \
-    GET_CALENDAR_BY_DATE_RESPONSE_EVENTS_PROPERTY
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 
 
@@ -15,15 +14,16 @@ class Get_Next_Meeting_Action:
         self.discord_bot = discordBot
         self.publisher = publisher
 
-    def execute(self, promise_id: int, messages: []):
+    def execute(self, promise_id: int, params: []):
         now = datetime.datetime.now()
         start_time = convert_rawdate_to_datetime(f'{now.year}/{now.month}/{now.day}')
         start_time = start_time.replace(tzinfo=datetime.timezone.utc)
         request = GetEventsByDateRequest(start_time).to_json()
-
         response = self.publisher.call(OUTLOOK_QUEUE, request)
-        meetings = response[MESSAGE_PAYLOAD][GET_CALENDAR_BY_DATE_RESPONSE_EVENTS_PROPERTY]
+        meetings = response.message
         selected_meetings = []
+        start_time = datetime.datetime.now()
+        start_time = start_time.replace(tzinfo=datetime.timezone.utc)
         for meeting in meetings:
             meeting_start = convert_rawdate_with_timezone_to_datetime(meeting['start_time'])
             if start_time > meeting_start:

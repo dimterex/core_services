@@ -4,6 +4,9 @@ import shutil
 SOURCE_FOLDER = 'D:\\Projects\\outlook2tracker'
 TARGET_FOLDER = 'C:\\Users\\UseR\\Downloads\\Temp deploy'
 
+SOURCE_PAGES = 'D:\\Projects\\web_host_application\\build'
+TARGET_PAGES = os.path.join(TARGET_FOLDER, 'web_host', 'pages')
+
 IGNORE_FOLDERS = ['.git', '.idea', 'docker', '__pycache__']
 
 
@@ -26,6 +29,10 @@ if __name__ == '__main__':
                 os.makedirs(target_path)
 
             shutil.copy(source_full_path, target_full_path)
+
+    shutil.rmtree(TARGET_PAGES)
+    shutil.copytree(SOURCE_PAGES, TARGET_PAGES, dirs_exist_ok=True)
+    os.startfile(TARGET_FOLDER)
     print("end")
 
 

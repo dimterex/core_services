@@ -1,7 +1,9 @@
+import asyncio
 import socket
 import threading
 from email.parser import Parser
 
+from modules.core.http_server.base_executor import BaseExecutor
 from modules.core.http_server.http_error import Http_Error
 from modules.core.http_server.http_request import Http_Request
 from modules.core.http_server.http_response import Http_Response
@@ -19,9 +21,9 @@ class CoreHttpServer:
             self._host = host
             self._port = port
             self._users = {}
-            self.handlers = {}
+            self.handlers: {str, BaseExecutor} = {}
 
-        def add_handler(self, path: str, callback):
+        def add_handler(self, path: str, callback: BaseExecutor):
             self.handlers[path] = callback
 
         def serve_forever(self):
@@ -29,6 +31,7 @@ class CoreHttpServer:
                 serv_sock = socket.socket(
                     socket.AF_INET,
                     socket.SOCK_STREAM,
+
                     proto=0)
 
                 try:
@@ -38,7 +41,8 @@ class CoreHttpServer:
                     while True:
                         conn, _ = serv_sock.accept()
                         try:
-                            self.serve_client(conn)
+                            th = threading.Thread(target=self.serve_client(conn))
+                            th.start()
                         except Exception as e:
                             self.logger_service.send_log(ERROR_LOG_LEVEL, self.__class__.__name__, f'Client starting failed: {e}')
                 finally:
@@ -52,6 +56,7 @@ class CoreHttpServer:
                 req = self.parse_request(conn)
                 resp = self.handle_request(req)
                 self.send_response(conn, resp)
+
             except ConnectionResetError:
                 conn = None
             except Exception as e:
@@ -107,13 +112,7 @@ class CoreHttpServer:
             return Parser().parsestr(sheaders)
 
         def handle_request(self, req: Http_Request):
-
-            # if (req.path == '/' and req.method == 'GET'):
-            #     return self.default_Page_Generator.generate(req)
-            # req.path[1:len(req.path)]
             path = req.path
-            print(f'{path} {req.query}')
-
             if path in self.handlers:
                 return self.handlers[path].generate(req)
 

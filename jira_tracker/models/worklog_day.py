@@ -9,9 +9,8 @@ class WorklogDay:
         self.date = date
         self.duration: float = duration_seconds / SECONDS_IN_HOUR
 
-    def to_json(self):
-        dict_object = {
+    def to_json(self) -> dict:
+        return {
             'date': str(self.date.date()),
             'duration': self.duration,
         }
-        return json.dumps(dict_object)

@@ -1,8 +1,8 @@
 from jira_tracker.jira_connection import Jira_Connection
 from modules.core.rabbitmq.messages.jira_tracker.create_subtask_request import CREATE_SUBTASK_REQUEST_NAME, \
     CREATE_SUBTASK_REQUEST_ROOT_ID, CREATE_SUBTASK_REQUEST_MESSAGE_TYPE
-from modules.core.rabbitmq.messages.jira_tracker.create_subtask_response import CreateSubTaskResponse
 from modules.core.log_service.log_service import Logger_Service, DEBUG_LOG_LEVEL
+from modules.core.rabbitmq.messages.status_response import StatusResponse
 from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
@@ -16,7 +16,7 @@ class CreateSubtaskRequestHandler(RpcBaseHandler):
     def get_message_type(self) -> str:
         return CREATE_SUBTASK_REQUEST_MESSAGE_TYPE
 
-    def execute(self, payload) -> str:
+    def execute(self, payload) -> StatusResponse:
         name = payload[CREATE_SUBTASK_REQUEST_NAME]
         root_id = payload[CREATE_SUBTASK_REQUEST_ROOT_ID]
 
@@ -41,6 +41,5 @@ class CreateSubtaskRequestHandler(RpcBaseHandler):
 
         jira.close()
         self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Disconnected to jira for create subtask...')
-        response = CreateSubTaskResponse(result.key)
-        return response.to_json()
+        return StatusResponse(result.key)
 

@@ -18,9 +18,8 @@ class WriteWorklogRequestHandler(RpcBaseHandler):
     def get_message_type(self) -> str:
         return WRITE_WORKLOG_REQUEST_MESSAGE_TYPE
 
-    def execute(self, payload) -> str:
-        rawWorklogs = payload[WRITE_WORKLOG_REQUEST_WORKLOGS]
-        worklogs = json.loads(rawWorklogs)
+    def execute(self, payload) -> StatusResponse:
+        worklogs = payload[WRITE_WORKLOG_REQUEST_WORKLOGS]
         self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Connecting to jira for write worklogs...')
         try:
             jira = self.jira.connect_to_jira()
@@ -31,13 +30,12 @@ class WriteWorklogRequestHandler(RpcBaseHandler):
                 date = convert_rawdate_with_timezone_to_datetime(issue['date'])
                 tracker_id = issue['tracker_id']
                 duration = issue['duration']
-                print(tracker_id, f'{duration}', date, name)
                 jira.add_worklog(tracker_id, timeSpent=f'{duration}', started=date, comment=name)
 
             jira.close()
-            response = StatusResponse()
+            response = StatusResponse(None)
             self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Disconnected to jira for write worklogs...')
         except Exception as e:
-            response = StatusResponse(ERROR_STATUS_CODE, f'{e}')
+            response = StatusResponse(f'{e}', ERROR_STATUS_CODE)
 
-        return response.to_json()
+        return response

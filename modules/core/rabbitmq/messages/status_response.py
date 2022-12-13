@@ -2,7 +2,7 @@ import json
 
 from modules.core.rabbitmq.messages.identificators import MESSAGE_PAYLOAD, MESSAGE_TYPE
 
-STATUS_RESPONSE_TYPE = 'exception_response_type'
+STATUS_RESPONSE_TYPE = 'status_response_type'
 STATUS_RESPONSE_MESSAGE_PROPERTY = 'message'
 STATUS_RESPONSE_STATUS_PROPERTY = 'status'
 
@@ -11,17 +11,22 @@ ERROR_STATUS_CODE = 'error'
 
 
 class StatusResponse:
-    def __init__(self, status=SUCCESS_STATUS_CODE, message=''):
+    def __init__(self, message: object, status: str = SUCCESS_STATUS_CODE):
         self.status = status
         self.message = message
 
-    def to_json(self):
-        dict_object = {
+    def to_json(self) -> dict:
+        return {
             MESSAGE_TYPE: STATUS_RESPONSE_TYPE,
             MESSAGE_PAYLOAD: {
                 STATUS_RESPONSE_MESSAGE_PROPERTY: self.message,
                 STATUS_RESPONSE_STATUS_PROPERTY: self.status,
             }
         }
-        return json.dumps(dict_object)
 
+    @staticmethod
+    def from_json(json_dct):
+        payload = json_dct[MESSAGE_PAYLOAD]
+        status = payload[STATUS_RESPONSE_STATUS_PROPERTY]
+        message = payload[STATUS_RESPONSE_MESSAGE_PROPERTY]
+        return StatusResponse(message, status)

@@ -7,3 +7,13 @@ class Worklog:
         self.name = name
         self.date = date
         self.duration = duration
+
+    def to_json(self):
+        dict = {
+            "name": self.name,
+            "date": str(self.date),
+            "tracker_id": self.issue_id,
+            "duration": self.duration
+        }
+
+        return dict

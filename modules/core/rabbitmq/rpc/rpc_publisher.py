@@ -1,15 +1,18 @@
+import codecs
 import json
 
 import pika
 import uuid
 
+from modules.core.rabbitmq.messages.status_response import StatusResponse
+
 
 class RpcPublisher(object):
     def __init__(self, url: str):
         self.url = url
-        self.responses: {str, str} = {}
+        self.responses: {str, object} = {}
 
-    def call(self, routing_key: str, message: str) -> str:
+    def call(self, routing_key: str, message: str) -> StatusResponse:
         connection = pika.BlockingConnection(parameters=pika.URLParameters(self.url))
         channel = connection.channel()
         result = channel.queue_declare(queue='', exclusive=True)
@@ -18,7 +21,7 @@ class RpcPublisher(object):
 
         def on_response(ch, method, props, body):
             if corr_id == props.correlation_id:
-                self.responses[corr_id] = body
+                self.responses[corr_id] = body.decode('utf-8')
 
         channel.basic_consume(
             queue=callback_queue,
@@ -37,6 +40,9 @@ class RpcPublisher(object):
         connection.close()
         response = self.responses[corr_id]
         self.responses.pop(corr_id)
-        return json.loads(response)
+        js = json.loads(response)
+        if isinstance(js, str):
+            return StatusResponse.from_json(json.loads(js))
+        return StatusResponse.from_json(js)
 
 

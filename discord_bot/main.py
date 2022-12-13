@@ -43,7 +43,6 @@ if __name__ == '__main__':
     command_controller.configure(WRITE_LOG_COMMAND, Write_Worklog_Action(rpc_publisher, discord_Bot))
     command_controller.configure(NEXT_MEETING_COMMAND, Get_Next_Meeting_Action(rpc_publisher, discord_Bot))
 
-
     def send_text(obj):
         promise_id = obj['promise_id']
         message = obj['message']
@@ -53,5 +52,7 @@ if __name__ == '__main__':
     consumer.start()
 
     loop = asyncio.get_event_loop()
+    print('Started')
     coro = loop.run_in_executor(None, discord_Bot.bot.run(discord_token))
     loop.run_until_complete(coro)
+

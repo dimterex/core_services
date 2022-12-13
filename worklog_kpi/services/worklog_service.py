@@ -1,6 +1,6 @@
-from datetime import datetime, date, timezone
+from datetime import datetime
 
-from modules.models.worklog import Worklog
+from worklog_kpi.models.worklog import Worklog
 
 
 class Worklog_Service:

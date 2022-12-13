@@ -17,8 +17,6 @@ HOST_ENVIRON = 'RABBIT_HOST'
 PORT_ENVIRON = 'RABBIT_PORT'
 
 
-
-
 def main():
     host = os.environ[HOST_ENVIRON]
     raw_port = os.environ[PORT_ENVIRON]
