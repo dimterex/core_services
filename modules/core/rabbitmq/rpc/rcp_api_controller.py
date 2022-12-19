@@ -13,7 +13,7 @@ class RpcApiController:
         self.TAG = self.__class__.__name__
 
     def subscribe(self, handler: RpcBaseHandler):
-        type = handler.get_message_type()
+        type = handler.message_type
         if type not in self.handlers:
             self.handlers[type] = handler
 
@@ -21,7 +21,7 @@ class RpcApiController:
         if message is None:
             return self.send_response(self.generate_exception_response('Message is None'))
         try:
-            self.logger_service.send_log(TRACE_LOG_LEVEL, self.TAG, str(message))
+            self.logger_service.trace(self.TAG, str(message))
             obj = json.loads(message)
             type = obj[MESSAGE_TYPE]
             payload = obj[MESSAGE_PAYLOAD]
@@ -31,7 +31,7 @@ class RpcApiController:
             return self.send_response(response)
         except Exception as e:
             error_message = f'Internal exception. \n Error: {e} \n Message: {message}'
-            self.logger_service.send_log(ERROR_LOG_LEVEL, self.TAG, error_message)
+            self.logger_service.error(self.TAG, error_message)
             response: StatusResponse = self.generate_exception_response(error_message)
             return self.send_response(response)
 

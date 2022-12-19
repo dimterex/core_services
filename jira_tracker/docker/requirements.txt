@@ -1,3 +1,0 @@
-pika
-python-dateutil
-todoist_api_python

@@ -1,6 +1,0 @@
-pika
-python-dateutil
-todoist_api_python
-exchangelib
-jira
-websocket_server
