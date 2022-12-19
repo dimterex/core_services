@@ -1,5 +1,5 @@
 from configuration.database.configuration_storage import ConfigurationStorage
-from modules.core.rabbitmq.messages.configuration.get_credentials_request import GET_CREDENTIALS_REQUEST_MESSAGE_TYPE
+from modules.core.rabbitmq.messages.configuration.credentials.get_credentials_request import GET_CREDENTIALS_REQUEST_MESSAGE_TYPE
 from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
 
 from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler

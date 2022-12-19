@@ -1,24 +1,29 @@
 from modules.core.http_server.base_executor import BaseExecutor
 from modules.core.http_server.http_request import Http_Request
 from modules.core.http_server.http_response import Http_Response
-from modules.core.rabbitmq.messages.configuration.meeting_categories.get_meeting_categories_request import GetMeetingCategoriesRequest
+from modules.core.rabbitmq.messages.configuration.category_model import CategoryModel
+from modules.core.rabbitmq.messages.configuration.meeting_categories.set_meeting_categories_request import SetMeetingCategoriesRequest
 from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
 from modules.core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
-from web_host.messages.get_meeting_categories_reponse import MeetingCategoriesResponse
+from web_host.messages.configuration.set_base_reponse import SetBaseResponse
 
 
-class GetMeetingsCategoryRequestExecutor(BaseExecutor):
+class SetMeetingsCategoryRequestExecutor(BaseExecutor):
     def __init__(self, rpcPublisher: RpcPublisher):
         self.rpcPublisher = rpcPublisher
 
     def generate(self, req: Http_Request) -> Http_Response:
-        response = self.rpcPublisher.call(CONFIGURATION_QUEUE, GetMeetingCategoriesRequest())
+        body = req.body
+        categories: list[CategoryModel] = []
+        for b in body:
+            categories.append(CategoryModel.deserialize(b))
 
-        result = MeetingCategoriesResponse(response.status)
+        response = self.rpcPublisher.call(CONFIGURATION_QUEUE, SetMeetingCategoriesRequest(categories))
 
+        result = SetBaseResponse(response.status)
         if result.status == SUCCESS_STATUS_CODE:
-            result.categories = response.message
+            result.exception = 'Success updated'
         else:
             result.exception = response.message
 

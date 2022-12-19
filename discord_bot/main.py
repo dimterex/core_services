@@ -8,32 +8,23 @@ from discord_bot.bot.command_controller import Command_Controller, NEXT_MEETING_
 from modules.core.log_service.log_service import Logger_Service
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from modules.core.rabbitmq.api_controller import Api_Controller
-from modules.core.rabbitmq.messages.identificators import DISCORD_SEND_MESSAGE, LOGGER_QUEUE, DISCORD_QUEUE
+from modules.core.rabbitmq.messages.identificators import DISCORD_SEND_MESSAGE, DISCORD_QUEUE
 from modules.core.rabbitmq.publisher import Publisher
 from modules.core.rabbitmq.receive import Consumer
 
-HOST_ENVIRON = 'RABBIT_HOST'
-PORT_ENVIRON = 'RABBIT_PORT'
 DISCORD_TOKEN = 'DISCORD_TOKEN'
+RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 
 
 if __name__ == '__main__':
     print('Starting')
-    host = os.environ[HOST_ENVIRON]
-    raw_port = os.environ[PORT_ENVIRON]
+    ampq_url = os.environ[RABBIT_CONNECTION_STRING]
     discord_token = os.environ[DISCORD_TOKEN]
-    port = int(raw_port)
 
-    logger_service = Logger_Service('Discord_Bot_Application')
+    logger_service = Logger_Service()
     api_controller = Api_Controller(logger_service)
-    ampq_url = f'amqp://guest:guest@{host}:{port}'
     publisher = Publisher(ampq_url)
     rpc_publisher = RpcPublisher(ampq_url)
-
-    def send_log(log_message):
-        publisher.send_message(LOGGER_QUEUE, log_message.to_json())
-
-    logger_service.configure_action(send_log)
 
     consumer = Consumer(ampq_url, DISCORD_QUEUE, api_controller, logger_service)
 
@@ -55,4 +46,3 @@ if __name__ == '__main__':
     print('Started')
     coro = loop.run_in_executor(None, discord_Bot.bot.run(discord_token))
     loop.run_until_complete(coro)
-

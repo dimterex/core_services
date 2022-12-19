@@ -40,7 +40,7 @@ class Api_Controller:
         if message is None:
             return
         try:
-            self.logger_service.send_log(TRACE_LOG_LEVEL, self.__class__.__name__, message)
+            self.logger_service.trace(self.__class__.__name__, message)
             obj = json.loads(message)
             type = obj[MESSAGE_TYPE]
             payload = obj[MESSAGE_PAYLOAD]
@@ -52,7 +52,7 @@ class Api_Controller:
             if type_handlers is not None:
                 type_handlers.execute(payload)
         except Exception as e:
-            self.logger_service.send_log(ERROR_LOG_LEVEL, self.__class__.__name__, f'Cant parse message: {e}; \n {message}')
+            self.logger_service.error(self.__class__.__name__, f'Cant parse message: {e}; \n {message}')
 
 
 class Type_To_Queue_Mapper:

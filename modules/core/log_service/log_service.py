@@ -1,6 +1,3 @@
-from datetime import datetime
-
-from modules.core.rabbitmq.messages.logger.log_message import Log_Message
 
 TRACE_LOG_LEVEL = 'Trace'
 DEBUG_LOG_LEVEL = 'Debug'
@@ -10,16 +7,20 @@ ERROR_LOG_LEVEL = 'Error'
 
 
 class Logger_Service:
-    def __init__(self, application_name: str):
-        self.application_name = application_name
-        self.action = None
+    def trace(self, tag: str, message: str):
+        self.print_message(TRACE_LOG_LEVEL, f'{tag}\t{message}')
 
-    def configure_action(self, action):
-        self.action = action
+    def debug(self, tag: str, message: str):
+        self.print_message(DEBUG_LOG_LEVEL, f'{tag}\t{message}')
 
-    def send_log(self, level: str, tag: str, message: str):
-        if self.action is None:
-            print(f'{level}\t{tag}\t{message}')
-            return
-        log_message = Log_Message(self.application_name, tag, level, f'{datetime.now()}', message)
-        self.action(log_message)
+    def info(self, tag: str, message: str):
+        self.print_message(INFO_LOG_LEVEL, f'{tag}\t{message}')
+
+    def warning(self, tag: str, message: str):
+        self.print_message(WARNING_LOG_LEVEL, f'{tag}\t{message}')
+
+    def error(self, tag: str, message: str):
+        self.print_message(ERROR_LOG_LEVEL, f'{tag}\t{message}')
+
+    def print_message(self, level: str, message: str):
+        print(f'{level}\t{message}')

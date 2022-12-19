@@ -35,7 +35,7 @@ class WorklogStorageService:
             cursor.execute(sqlite_create_table_query)
             sqlite_connection.commit()
         except Exception as e:
-            self.logger.send_log(ERROR_LOG_LEVEL, self.TAG, str(e))
+            self.logger.error(self.TAG, str(e))
         finally:
             if sqlite_connection:
                 sqlite_connection.close()
@@ -58,7 +58,7 @@ class WorklogStorageService:
             cursor.close()
 
         except sqlite3.Error as error:
-            self.logger.send_log(ERROR_LOG_LEVEL, self.TAG, str(error))
+            self.logger.error(self.TAG, str(error))
         finally:
             if sqlite_connection:
                 sqlite_connection.close()
@@ -77,7 +77,7 @@ class WorklogStorageService:
             cursor.close()
             return result
         except sqlite3.Error as error:
-            self.logger.send_log(ERROR_LOG_LEVEL, self.TAG, str(error))
+            self.logger.error(self.TAG, str(error))
         finally:
             if sqlite_connection:
                 sqlite_connection.close()

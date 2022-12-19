@@ -2,44 +2,43 @@ import os
 import time
 import warnings
 
-from modules.core.rabbitmq.messages.identificators import LOGGER_QUEUE, OUTLOOK_QUEUE
-from modules.core.rabbitmq.publisher import Publisher
+from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
+from modules.core.rabbitmq.messages.configuration.credentials.get_credentials_request import GetCredentialsRequest
+from modules.core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
+from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, OUTLOOK_URL_TYPE, \
+    OUTLOOK_QUEUE
+from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
 from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
 from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
-from modules.models.configuration import Configuration
+from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 
 from modules.core.log_service.log_service import Logger_Service
 from outlook.handlers.get_events_by_date_handler import GetEventsByDateHandler
 from outlook.outlook_connection import Outlook_Connection
 
-SETTINGS_FILE = 'settings.json'
-HOST_ENVIRON = 'RABBIT_HOST'
-PORT_ENVIRON = 'RABBIT_PORT'
+RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 
 
 def main():
-    host = os.environ[HOST_ENVIRON]
-    raw_port = os.environ[PORT_ENVIRON]
-    port = int(raw_port)
+    logger_service = Logger_Service()
+    ampq_url = os.environ[RABBIT_CONNECTION_STRING]
 
-    logger_service = Logger_Service('Outlook_application')
-    ampq_url = f'amqp://guest:guest@{host}:{port}'
-    publisher = Publisher(ampq_url)
+    rpc_publisher = RpcPublisher(ampq_url)
+    credentials_response = rpc_publisher.call(CONFIGURATION_QUEUE, GetCredentialsRequest())
 
-    def send_log(log_message):
-        publisher.send_message(LOGGER_QUEUE, log_message.to_json())
+    if credentials_response.status == ERROR_STATUS_CODE:
+        raise Exception(credentials_response.message)
 
-    logger_service.configure_action(send_log)
+    credentials = CredentialModel.deserialize(credentials_response.message)
+    get_url_response = rpc_publisher.call(CONFIGURATION_QUEUE, GetUrlRequest(OUTLOOK_URL_TYPE))
 
-    with open(SETTINGS_FILE, 'r', encoding='utf8') as json_file:
-        raw_data = json_file.read()
-        configuration = Configuration(raw_data)
+    if get_url_response.status == ERROR_STATUS_CODE:
+        raise Exception(get_url_response.message)
 
-    domain_login = f'{configuration.domain}\\{configuration.login}'
-    outlook_connection = Outlook_Connection(configuration.outlook, configuration.email, domain_login,
-                                            configuration.password, logger_service)
+    domain_login = f'{credentials.domain}\\{credentials.login}'
+    outlook_connection = Outlook_Connection(str(get_url_response.message), domain_login, credentials, logger_service)
     api_controller = RpcApiController(logger_service)
-    api_controller.subscribe(GetEventsByDateHandler(configuration, outlook_connection, logger_service))
+    api_controller.subscribe(GetEventsByDateHandler(outlook_connection, logger_service))
     rcp = RpcConsumer(ampq_url, OUTLOOK_QUEUE, api_controller)
     rcp.start()
 

@@ -11,19 +11,17 @@ from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 class WriteWorklogRequestHandler(RpcBaseHandler):
     def __init__(self, jira: Jira_Connection, logger_service: Logger_Service):
+        super().__init__(WRITE_WORKLOG_REQUEST_MESSAGE_TYPE)
         self.logger_service = logger_service
         self.jira = jira
         self.TAG = self.__class__.__name__
 
-    def get_message_type(self) -> str:
-        return WRITE_WORKLOG_REQUEST_MESSAGE_TYPE
-
     def execute(self, payload) -> StatusResponse:
         worklogs = payload[WRITE_WORKLOG_REQUEST_WORKLOGS]
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Connecting to jira for write worklogs...')
+        self.logger_service.debug(self.TAG, 'Connecting to jira for write worklogs...')
         try:
             jira = self.jira.connect_to_jira()
-            self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Connected to jira for write worklogs...')
+            self.logger_service.debug(self.TAG, 'Connected to jira for write worklogs...')
 
             for issue in worklogs:
                 name = issue['name']
@@ -34,7 +32,7 @@ class WriteWorklogRequestHandler(RpcBaseHandler):
 
             jira.close()
             response = StatusResponse(None)
-            self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Disconnected to jira for write worklogs...')
+            self.logger_service.debug(self.TAG, 'Disconnected to jira for write worklogs...')
         except Exception as e:
             response = StatusResponse(f'{e}', ERROR_STATUS_CODE)
 

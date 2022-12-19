@@ -1,5 +1,4 @@
 import datetime
-import json
 
 from discord_bot.bot.discord_bot import Discord_Bot
 from modules.core.rabbitmq.messages.identificators import OUTLOOK_QUEUE, MESSAGE_PAYLOAD
@@ -18,7 +17,7 @@ class Get_Next_Meeting_Action:
         now = datetime.datetime.now()
         start_time = convert_rawdate_to_datetime(f'{now.year}/{now.month}/{now.day}')
         start_time = start_time.replace(tzinfo=datetime.timezone.utc)
-        request = GetEventsByDateRequest(start_time).to_json()
+        request = GetEventsByDateRequest(start_time)
         response = self.publisher.call(OUTLOOK_QUEUE, request)
         meetings = response.message
         selected_meetings = []

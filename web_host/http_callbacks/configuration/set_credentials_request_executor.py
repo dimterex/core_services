@@ -6,7 +6,7 @@ from modules.core.rabbitmq.messages.configuration.credentials.set_credentials_re
 from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
 from modules.core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
-from web_host.messages.set_credentials_reponse import UpdateCredentialsResponse
+from web_host.messages.configuration.set_base_reponse import SetBaseResponse
 
 
 class SetCredentialsRequestExecutor(BaseExecutor):
@@ -14,11 +14,10 @@ class SetCredentialsRequestExecutor(BaseExecutor):
         self.rpcPublisher = rpcPublisher
 
     def generate(self, req: Http_Request) -> Http_Response:
-        body = req.body
-        credentialModel = CredentialModel.deserialize(body)
+        credentialModel = CredentialModel.deserialize(req.body)
         response = self.rpcPublisher.call(CONFIGURATION_QUEUE, SetCredentialsRequest(credentialModel))
 
-        result = UpdateCredentialsResponse(response.status)
+        result = SetBaseResponse(response.status)
 
         if result.status == SUCCESS_STATUS_CODE:
             result.exception = 'Success updated'

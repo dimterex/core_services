@@ -1,5 +1,5 @@
 from modules.core.rabbitmq.messages.base_request import BaseMessage
-from modules.core.rabbitmq.messages.configuration.credential_model import CredentialModel
+from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
 
 SET_CREDENTIALS_REQUEST_MESSAGE_TYPE = 'set_credentials_request'
 

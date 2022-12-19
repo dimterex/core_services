@@ -18,7 +18,7 @@ class Worklog_By_Periodical:
         self.start_time = start_time
 
     def modify(self):
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Starting modify')
+        self.logger_service.debug(self.__class__.__name__, 'Starting modify')
         hours = 0.5
 
         for task in self.configuration.periodical:
@@ -28,4 +28,4 @@ class Worklog_By_Periodical:
             category = self.configuration.meetings_categories[task]
             self.worklog_service.add_worklog(task.name, self.start_time.replace(hour=7), category.jira_issue_id, hours)
         self.worklog_service.from_config = True
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.__class__.__name__, 'Ending modify')
+        self.logger_service.debug(self.__class__.__name__, 'Ending modify')

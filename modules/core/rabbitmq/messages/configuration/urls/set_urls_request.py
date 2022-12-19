@@ -5,7 +5,7 @@ SET_URL_REQUEST_MESSAGE_TYPE = 'set_urls_request'
 SET_URL_REQUEST_MODELS_MESSAGE_PROPERTY = 'models'
 
 
-class SetUrlRequest(BaseMessage):
+class SetUrlsRequest(BaseMessage):
     def __init__(self, models: list[UrlModel]):
         super().__init__(SET_URL_REQUEST_MESSAGE_TYPE)
         self.models = models
@@ -18,4 +18,4 @@ class SetUrlRequest(BaseMessage):
     @staticmethod
     def deserialize(payload):
         urls = payload[SET_URL_REQUEST_MODELS_MESSAGE_PROPERTY]
-        return SetUrlRequest(urls)
+        return SetUrlsRequest(urls)

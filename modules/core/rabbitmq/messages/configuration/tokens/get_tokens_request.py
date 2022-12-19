@@ -1,12 +1,12 @@
 from modules.core.rabbitmq.messages.base_request import BaseMessage
 
-GET_TODOIST_CATEGORIES_REQUEST_MESSAGE_TYPE = 'get_toodist_categories_request'
+GET_TOKENS_REQUEST_MESSAGE_TYPE = 'get_tokens_request'
 
 
-class GetTodoitsCategoriesRequest(BaseMessage):
+class GetTokensRequest(BaseMessage):
 
     def __init__(self):
-        super().__init__(GET_TODOIST_CATEGORIES_REQUEST_MESSAGE_TYPE)
+        super().__init__(GET_TOKENS_REQUEST_MESSAGE_TYPE)
 
     def serialize(self):
         return self.to_json(None)

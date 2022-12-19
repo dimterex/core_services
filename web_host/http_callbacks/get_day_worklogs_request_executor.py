@@ -21,7 +21,7 @@ class GetDayWorklogsRequestExecutor(BaseExecutor):
         day = int(req.query["day"][0])
         date_time = convert_rawdate_to_datetime(f'{year}/{month}/{day}')
 
-        request = GetHistoryByDateRequest(date_time).to_json()
+        request = GetHistoryByDateRequest(date_time)
         response: StatusResponse = self.rpcPublisher.call(WORKLOG_QUEUE, request)
 
         result = HistoryItemResponse(response.status)

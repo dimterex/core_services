@@ -5,7 +5,7 @@ from modules.core.rabbitmq.messages.configuration.meeting_categories.get_meeting
 from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
 from modules.core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
-from web_host.messages.get_meeting_categories_reponse import MeetingCategoriesResponse
+from web_host.messages.configuration.get_meeting_categories_reponse import MeetingCategoriesResponse
 
 
 class GetMeetingsCategoryRequestExecutor(BaseExecutor):

@@ -1,4 +1,5 @@
 import asyncio
+import json
 import socket
 import threading
 from email.parser import Parser
@@ -44,7 +45,7 @@ class CoreHttpServer:
                             th = threading.Thread(target=self.serve_client(conn))
                             th.start()
                         except Exception as e:
-                            self.logger_service.send_log(ERROR_LOG_LEVEL, self.__class__.__name__, f'Client starting failed: {e}')
+                            self.logger_service.error(self.__class__.__name__, f'Client starting failed: {e}')
                 finally:
                     serv_sock.close()
 
@@ -61,10 +62,9 @@ class CoreHttpServer:
                 conn = None
             except Exception as e:
                 self.send_error(conn, e)
-                self.logger_service.send_log(ERROR_LOG_LEVEL, self.__class__.__name__, f'Request parse failed: {e}')
+                self.logger_service.error(self.__class__.__name__, f'Request parse failed: {e}')
 
             if conn:
-                req.rfile.close()
                 conn.close()
 
         def parse_request(self, conn):
@@ -75,7 +75,12 @@ class CoreHttpServer:
             if not host:
                 raise Http_Error(400, 'Bad request',
                                  'Host header is missing')
-            return Http_Request(method, target, ver, headers, rfile)
+            size = headers.get('Content-Length')
+            body: bytes = None
+            if size:
+                body = json.loads(rfile.read(int(size)))
+            rfile.close()
+            return Http_Request(method, target, ver, headers, body)
 
         def parse_request_line(self, rfile):
             raw = rfile.readline(MAX_LINE + 1)
@@ -113,6 +118,7 @@ class CoreHttpServer:
 
         def handle_request(self, req: Http_Request):
             path = req.path
+            print(path)
             if path in self.handlers:
                 return self.handlers[path].generate(req)
 

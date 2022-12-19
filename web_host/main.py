@@ -3,37 +3,38 @@ import time
 import warnings
 
 from modules.core.http_server.core_http_server import CoreHttpServer
-from modules.core.http_server.web_socket import WebSocketService
 from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.publisher import Publisher
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from modules.core.http_server.resource_executor import ResourceExecutor
+from web_host.http_callbacks.configuration.get_credentials_request_executor import GetCredentialsRequestExecutor
+from web_host.http_callbacks.configuration.get_todoist_category_request_executor import \
+    GetTodoistCategoryRequestExecutor
+from web_host.http_callbacks.configuration.get_tokens_request_executor import GetTokensRequestExecutor
+from web_host.http_callbacks.configuration.get_urls_request_executor import GetUrlsRequestExecutor
+from web_host.http_callbacks.configuration.set_meetings_category_request_executor import \
+    SetMeetingsCategoryRequestExecutor
+from web_host.http_callbacks.configuration.set_todoist_category_request_executor import \
+    SetTodoistCategoryRequestExecutor
+from web_host.http_callbacks.configuration.set_tokens_request_executor import SetTokensRequestExecutor
+from web_host.http_callbacks.configuration.set_urls_request_executor import SetUrlsRequestExecutor
 from web_host.http_callbacks.get_day_events_request_executor import GetDayEventsRequestExecutor
 from web_host.http_callbacks.get_day_worklogs_request_executor import GetDayWorklogsRequestExecutor
+from web_host.http_callbacks.configuration.get_meetings_category_request_executor import GetMeetingsCategoryRequestExecutor
 from web_host.http_callbacks.get_month_time_request_executor import GetMonthTimeRequestExecutor
+from web_host.http_callbacks.configuration.set_credentials_request_executor import SetCredentialsRequestExecutor
 from web_host.http_callbacks.set_worklog_time_request_executor import SetWorklogTimeRequestExecutor
 
-HOST_ENVIRON = 'RABBIT_HOST'
-PORT_ENVIRON = 'RABBIT_PORT'
-PAGES_FOLDER = 'PAGES_FOLDER'
+STATIC_PATH = 'STATIC_PATH'
 CACHE_RESPONSE_PERIOD_SECONDS = 1800
+RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 
 
 def main():
-    host = os.environ[HOST_ENVIRON]
-    raw_port = os.environ[PORT_ENVIRON]
-    static_folder = os.environ[PAGES_FOLDER]
-    port = int(raw_port)
+    logger_service = Logger_Service()
+    ampq_url = os.environ[RABBIT_CONNECTION_STRING]
+    static_folder = os.environ[STATIC_PATH]
 
-    logger_service = Logger_Service('Web_host_application')
-    ampq_url = f'amqp://guest:guest@{host}:{port}'
-    publisher = Publisher(ampq_url)
     rpc_publisher = RpcPublisher(ampq_url)
-
-    # def send_log(log_message):
-    #     publisher.send_message(LOGGER_QUEUE, log_message.to_json())
-    #
-    # logger_service.configure_action(send_log)
 
     httpServer = CoreHttpServer(6789, logger_service)
     main_page = "index.html"
@@ -45,14 +46,28 @@ def main():
             if f == main_page:
                 httpServer.add_handler('/', ResourceExecutor(full_path))
                 httpServer.add_handler('/logger', ResourceExecutor(full_path))
+                httpServer.add_handler('/configuration', ResourceExecutor(full_path))
                 continue
 
             httpServer.add_handler(html_path, ResourceExecutor(full_path))
 
-    httpServer.add_handler('/get_month_times', GetMonthTimeRequestExecutor(rpc_publisher, CACHE_RESPONSE_PERIOD_SECONDS))
-    httpServer.add_handler('/get_day_events', GetDayEventsRequestExecutor(rpc_publisher))
-    httpServer.add_handler('/get_day_worklogs', GetDayWorklogsRequestExecutor(rpc_publisher))
-    httpServer.add_handler('/set_worklog_time', SetWorklogTimeRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/get_month_times', GetMonthTimeRequestExecutor(rpc_publisher, CACHE_RESPONSE_PERIOD_SECONDS))
+    httpServer.add_handler('/api/get_day_events', GetDayEventsRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/get_day_worklogs', GetDayWorklogsRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/set_worklog_time', SetWorklogTimeRequestExecutor(rpc_publisher))
+
+
+    httpServer.add_handler('/api/configuration/get_credentials', GetCredentialsRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/configuration/set_credentials', SetCredentialsRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/configuration/get_meeting_categories', GetMeetingsCategoryRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/configuration/set_meeting_categories', SetMeetingsCategoryRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/configuration/get_task_categories', GetTodoistCategoryRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/configuration/set_task_categories', SetTodoistCategoryRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/configuration/get_tokens', GetTokensRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/configuration/set_tokens', SetTokensRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/configuration/get_urls', GetUrlsRequestExecutor(rpc_publisher))
+    httpServer.add_handler('/api/configuration/set_urls', SetUrlsRequestExecutor(rpc_publisher))
+
     httpServer.serve_forever()
     # hostname = '0.0.0.0'
     # websocket_port = 60009

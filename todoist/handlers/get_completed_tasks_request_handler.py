@@ -11,7 +11,6 @@ from modules.core.helpers.helper import convert_rawdate_to_datetime
 from modules.core.rabbitmq.messages.status_response import StatusResponse, ERROR_STATUS_CODE
 from modules.core.rabbitmq.messages.todoist.get_completed_tasks_request import COMPLETED_TASKS_REQUEST_MESSAGE_TYPE, \
     COMPLETED_TASKS_REQUEST_DATE_PROPERTY
-from modules.core.rabbitmq.messages.todoist.get_completed_tasks_response import GetCompletedTasksResponse
 from modules.core.log_service.log_service import DEBUG_LOG_LEVEL, Logger_Service, INFO_LOG_LEVEL, TRACE_LOG_LEVEL
 from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 from todoist.models.task_entry import Task_Entry
@@ -20,25 +19,23 @@ from todoist.models.todoist_tasks import Todoist_Tasks
 
 class GetCompletedTasksRequestHandler(RpcBaseHandler):
     def __init__(self, todoist: TodoistAPI, logger_service: Logger_Service):
+        super().__init__(COMPLETED_TASKS_REQUEST_MESSAGE_TYPE)
         self.logger_service = logger_service
         self.todoistAPI = todoist
         self.TAG = self.__class__.__name__
 
-    def get_message_type(self) -> str:
-        return COMPLETED_TASKS_REQUEST_MESSAGE_TYPE
-
     def execute(self, payload) -> StatusResponse:
         start_time = convert_rawdate_to_datetime(payload[COMPLETED_TASKS_REQUEST_DATE_PROPERTY])
 
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Starting modify')
+        self.logger_service.debug(self.TAG, 'Starting modify')
 
         try:
             completed_tasks = self.get_competed_tasks(start_time)
 
             if len(completed_tasks) == 0:
-                self.logger_service.send_log(INFO_LOG_LEVEL, self.TAG, 'Not tasks.')
+                self.logger_service.info(self.TAG, 'Not tasks.')
 
-            self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Ending modify')
+            self.logger_service.debug(self.TAG, 'Ending modify')
             issues = []
             for issue in completed_tasks:
                 issues.append(issue.to_json())
@@ -48,7 +45,7 @@ class GetCompletedTasksRequestHandler(RpcBaseHandler):
         except Exception as e:
             return StatusResponse(str(e), ERROR_STATUS_CODE)
         finally:
-            self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Ended')
+            self.logger_service.debug(self.TAG, 'Ended')
 
     def get_competed_tasks(self, start_time: datetime):
         day = str(start_time.day)
@@ -61,7 +58,7 @@ class GetCompletedTasksRequestHandler(RpcBaseHandler):
         correct_tasks = []
         for task_id in Todoist_Tasks(tasks).items:
             taskInfo: Task = self.todoistAPI.get_task(task_id)
-            self.logger_service.send_log(TRACE_LOG_LEVEL, self.TAG, str(taskInfo))
+            self.logger_service.trace(self.TAG, str(taskInfo))
             if taskInfo.section_id == 0:
                 sectionInfo = self.todoistAPI.get_section(83787255)
             else:

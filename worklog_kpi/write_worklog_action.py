@@ -1,10 +1,16 @@
 import datetime
 
 from modules.core.helpers.helper import convert_rawdate_with_timezone_to_datetime
-from modules.core.rabbitmq.messages.identificators import MESSAGE_PAYLOAD, OUTLOOK_QUEUE, JIRA_QUEUE, TODOIST_QUEUE
+from modules.core.rabbitmq.messages.configuration.category_model import CategoryModel
+from modules.core.rabbitmq.messages.configuration.meeting_categories.get_meeting_categories_request import \
+    GetMeetingCategoriesRequest
+from modules.core.rabbitmq.messages.configuration.todoits_categories.get_todoits_categories_request import \
+    GetTodoitsCategoriesRequest
+from modules.core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
+from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, JIRA_URL_TYPE, OUTLOOK_QUEUE, \
+    JIRA_QUEUE, TODOIST_QUEUE
 from modules.core.rabbitmq.messages.outlook.get_events_by_date_request import GetEventsByDateRequest
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, STATUS_RESPONSE_STATUS_PROPERTY, \
-    STATUS_RESPONSE_MESSAGE_PROPERTY, StatusResponse
+from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
 from modules.core.rabbitmq.messages.todoist.get_completed_tasks_request import GetCompletedTasksRequest
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 
@@ -12,7 +18,7 @@ from modules.core.rabbitmq.messages.jira_tracker.create_subtask_request import C
 from modules.core.rabbitmq.messages.jira_tracker.write_worklog_request import WriteWorklogsRequest
 from modules.core.rabbitmq.messages.todoist.update_label_request import UpdateLabelRequest
 from modules.models.configuration import Configuration
-from modules.core.log_service.log_service import Logger_Service, DEBUG_LOG_LEVEL, ERROR_LOG_LEVEL
+from modules.core.log_service.log_service import Logger_Service
 from modules.core.rabbitmq.publisher import Publisher
 from outlook.models.outlook_meeting import GET_CALENDAR_BY_DATE_RESPONSE_EVENT_CATEGORIES_PROPERTY, \
     GET_CALENDAR_BY_DATE_RESPONSE_EVENT_NAME_PROPERTY, GET_CALENDAR_BY_DATE_RESPONSE_EVENT_START_TIME_PROPERTY, \
@@ -38,11 +44,17 @@ class Write_WorkLok_Action:
         self.publisher = publisher
         self.configuration = configuration
         self.jira_create_task = {}
-        self.rps = RpcPublisher(self.publisher._url)
+        self.rpc_publisher = RpcPublisher(self.publisher._url)
         self.TAG = self.__class__.__name__
+        get_url_response = self.rpc_publisher.call(CONFIGURATION_QUEUE, GetUrlRequest(JIRA_URL_TYPE))
+
+        if get_url_response.status == ERROR_STATUS_CODE:
+            raise Exception(get_url_response.message)
+        self.jira_url: str = str(get_url_response.message)
+
 
     def write(self, start_time: datetime.datetime) -> StatusResponse:
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Send result message')
+        self.logger_service.debug(self.TAG, 'Send result message')
         start_time = start_time.replace(tzinfo=datetime.timezone.utc)
         workLogService = Worklog_Service(start_time)
         self.write_sync(start_time, workLogService)
@@ -55,32 +67,32 @@ class Write_WorkLok_Action:
         worklogs = []
         for worklog in workLogService.worklogs:
             worklogs.append(worklog.to_json())
-        request_write_jira = WriteWorklogsRequest(worklogs).to_json()
-        response_write_jira = self.rps.call(JIRA_QUEUE, request_write_jira)
+        request_write_jira = WriteWorklogsRequest(worklogs)
+        response_write_jira = self.rpc_publisher.call(JIRA_QUEUE, request_write_jira)
 
         if response_write_jira.status == ERROR_STATUS_CODE:
             return response_write_jira
 
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Ended')
+        self.logger_service.debug(self.TAG, 'Ended')
         message = self.get_response_message(workLogService)
         self.storage.add(WorklogSqliteModel(str(start_time.date()), message))
         return StatusResponse(message)
 
     def get_response_message(self, worklogs_service: Worklog_Service):
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Prepare tasks ...')
+        self.logger_service.debug(self.TAG, 'Prepare tasks ...')
         message: list[str] = []
         timelog = worklogs_service.get_summary()
         message.append(f'Day: {worklogs_service.start_time}')
         for worklog in worklogs_service.worklogs:
-            url = f'{self.configuration.jira}/browse/{worklog.issue_id}'
+            url = f'{self.jira_url}/browse/{worklog.issue_id}'
             message.append(f'\t {worklog.duration} | {url} | {worklog.name}')
 
         message.append(f'\t Summary: {timelog}')
         return '\n'.join(message)
 
     def get_competed_tasks(self, start_time: datetime.datetime, worklogs_service: Worklog_Service) -> str:
-        request = GetCompletedTasksRequest(start_time).to_json()
-        response = self.rps.call(TODOIST_QUEUE, request)
+        request = GetCompletedTasksRequest(start_time)
+        response = self.rpc_publisher.call(TODOIST_QUEUE, request)
 
         if response.status == ERROR_STATUS_CODE:
             return response.message
@@ -101,34 +113,46 @@ class Write_WorkLok_Action:
         return None
 
     def get_calendar_tasks(self, start_time: datetime.datetime, worklogs_service: Worklog_Service):
-        request = GetEventsByDateRequest(start_time).to_json()
-        response = self.rps.call(OUTLOOK_QUEUE, request)
+        self.logger_service.debug(self.TAG, 'Starting modify')
 
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Starting modify')
+        events_request = GetEventsByDateRequest(start_time)
+        events_response = self.rpc_publisher.call(OUTLOOK_QUEUE, events_request)
 
-        for calendar_item in response.message:
+        categories_request = GetMeetingCategoriesRequest()
+        categories_response = self.rpc_publisher.call(CONFIGURATION_QUEUE, categories_request)
+
+        categories: list[CategoryModel] = []
+        for category in categories_response.message:
+            categories.append(CategoryModel.deserialize(category))
+
+        def find_in_categories_by_name(name: str) -> CategoryModel:
+            for category in categories:
+                if category.name == name:
+                    return category
+            return None
+
+        for calendar_item in events_response.message:
             try:
-                if calendar_item[GET_CALENDAR_BY_DATE_RESPONSE_EVENT_CATEGORIES_PROPERTY] is None:
-                    category = self.configuration.meetings_categories[None]
+                item_categories = calendar_item[GET_CALENDAR_BY_DATE_RESPONSE_EVENT_CATEGORIES_PROPERTY]
+                if item_categories is None:
+                    category = find_in_categories_by_name('')
                 else:
+                    category = find_in_categories_by_name(item_categories[0])
+                    if category is None:
+                        category = find_in_categories_by_name('')
 
-                    if self.configuration.ignore in calendar_item[GET_CALENDAR_BY_DATE_RESPONSE_EVENT_CATEGORIES_PROPERTY]:
-                        continue
-
-                    if calendar_item[GET_CALENDAR_BY_DATE_RESPONSE_EVENT_CATEGORIES_PROPERTY][0] not in self.configuration.meetings_categories:
-                        category = self.configuration.meetings_categories[None]
-                    else:
-                        category = self.configuration.meetings_categories[calendar_item[GET_CALENDAR_BY_DATE_RESPONSE_EVENT_CATEGORIES_PROPERTY][0]]
+                if category.tracker_id is None or category.tracker_id is '':
+                    continue
 
                 worklogs_service.add_worklog(calendar_item[GET_CALENDAR_BY_DATE_RESPONSE_EVENT_NAME_PROPERTY],
                                              convert_rawdate_with_timezone_to_datetime(calendar_item[GET_CALENDAR_BY_DATE_RESPONSE_EVENT_START_TIME_PROPERTY]),
-                                             category.jira_issue_id,
+                                             category.tracker_id,
                                              float(calendar_item[GET_CALENDAR_BY_DATE_RESPONSE_EVENT_DURATION_PROPERTY]))
             except Exception as e:
-                self.logger_service.send_log(ERROR_LOG_LEVEL, self.TAG, f'Error \n\t{e}')
+                self.logger_service.error(self.TAG, f'Error \n\t{e}')
 
         worklogs_service.from_calendar = True
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Ending modify')
+        self.logger_service.debug(self.TAG, 'Ending modify')
 
     def check_issues(self, issue):
         name = issue['name']
@@ -139,24 +163,35 @@ class Write_WorkLok_Action:
         if tracker_id is not None:
             return
 
-        if issue_category is None:
-            category = self.configuration.tasks_categories[None]
-        else:
-            if issue_category not in self.configuration.tasks_categories:
-                category = self.configuration.tasks_categories[None]
-            else:
-                category = self.configuration.tasks_categories[issue_category]
+        categories_request = GetTodoitsCategoriesRequest()
+        categories_response = self.rpc_publisher.call(CONFIGURATION_QUEUE, categories_request)
 
-        parent_issue_id = category.jira_issue_id
-        create_task_request = CreateSubTaskRequest(name, parent_issue_id).to_json()
-        create_task_response = self.rps.call(JIRA_QUEUE, create_task_request)
+        categories: list[CategoryModel] = []
+        for category in categories_response.message:
+            categories.append(CategoryModel.deserialize(category))
+
+        def find_in_categories_by_name(name: str) -> CategoryModel:
+            for category in categories:
+                if category.name == name:
+                    return category
+            return None
+
+        if issue_category is None:
+            category = find_in_categories_by_name('')
+        else:
+            category = find_in_categories_by_name(issue_category)
+            if category is None:
+                category = find_in_categories_by_name('')
+
+        parent_issue_id = category.tracker_id
+        create_task_request = CreateSubTaskRequest(name, parent_issue_id)
+        create_task_response = self.rpc_publisher.call(JIRA_QUEUE, create_task_request)
 
         tracker_id = create_task_response.message
         issue['tracker_id'] = tracker_id
-        update_label_request = UpdateLabelRequest(tracker_id, issue_id).to_json()
-        update_label_response = self.rps.call(TODOIST_QUEUE, update_label_request)
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, str(update_label_response.to_json()))
-
+        update_label_request = UpdateLabelRequest(tracker_id, issue_id)
+        update_label_response = self.rpc_publisher.call(TODOIST_QUEUE, update_label_request)
+        self.logger_service.debug(self.TAG, str(update_label_response.to_json()))
 
     def write_sync(self, start_time: datetime.datetime, worklogs_service: Worklog_Service):
         Worklog_By_Periodical(self.configuration, start_time, worklogs_service, self.logger_service).modify()

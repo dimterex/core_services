@@ -13,23 +13,20 @@ from outlook.outlook_connection import Outlook_Connection
 
 
 class GetEventsByDateHandler(RpcBaseHandler):
-    def __init__(self, configuration: Configuration, outlook: Outlook_Connection, logger_service: Logger_Service):
-        self.configuration = configuration
+    def __init__(self, outlook: Outlook_Connection, logger_service: Logger_Service):
+        super().__init__(GET_CALENDAR_BY_DATE_REQUEST)
         self.logger_service = logger_service
         self.outlook = outlook
         self.TAG = self.__class__.__name__
 
-    def get_message_type(self) -> str:
-        return GET_CALENDAR_BY_DATE_REQUEST
-
     def execute(self, payload) -> StatusResponse:
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Starting modify')
+        self.logger_service.debug(self.TAG, 'Starting modify')
         start_time: datetime = convert_rawdate_with_timezone_to_datetime(payload[GET_CALENDAR_DATE_PROPERTY])
         meetings: list[Outlook_Meeting] = self.outlook.get_meeting(start_time)
 
         worklogs = []
         for calendar_item in meetings:
             worklogs.append(calendar_item.to_json())
-        self.logger_service.send_log(DEBUG_LOG_LEVEL, self.TAG, 'Ending modify')
+        self.logger_service.debug(self.TAG, 'Ending modify')
         response = StatusResponse(worklogs)
         return response

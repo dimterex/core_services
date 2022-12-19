@@ -9,10 +9,8 @@ from worklog_kpi.write_worklog_action import Write_WorkLok_Action
 
 class Write_Worklog_Request_Handler(RpcBaseHandler):
     def __init__(self, write_WorkLok_Action: Write_WorkLok_Action):
+        super().__init__(WORKLOG_WRITE_MESSAGE_REQUEST_TYPE)
         self.write_WorkLok_Action = write_WorkLok_Action
-
-    def get_message_type(self) -> str:
-        return WORKLOG_WRITE_MESSAGE_REQUEST_TYPE
 
     def execute(self, payload) -> StatusResponse:
         start_time = convert_rawdate_to_datetime(payload[WORKLOG_WRITE_MESSAGE_REQUEST_DAY_PROPERTY])

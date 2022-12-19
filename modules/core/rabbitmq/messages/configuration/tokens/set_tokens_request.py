@@ -1,29 +1,29 @@
 from modules.core.rabbitmq.messages.base_request import BaseMessage
-from modules.core.rabbitmq.messages.configuration.category_model import CategoryModel
+from modules.core.rabbitmq.messages.configuration.token_model import TokenModel
 
-SET_TODOIST_CATEGORIES_REQUEST_MESSAGE_TYPE = 'set_todoist_categories_request'
-SET_TODOIST_CATEGORIES_REQUEST_CATEGORIES_PROPERTY = 'categories'
+SET_TOKENS_REQUEST_MESSAGE_TYPE = 'set_tokens_request'
+SET_TOKENS_REQUEST_CATEGORIES_PROPERTY = 'tokens'
 
 
-class SetTodoistCategoriesRequest(BaseMessage):
-    def __init__(self, categories: list[CategoryModel]):
-        super().__init__(SET_TODOIST_CATEGORIES_REQUEST_MESSAGE_TYPE)
-        self.categories = categories
+class SetTokensRequest(BaseMessage):
+    def __init__(self, tokens: list[TokenModel]):
+        super().__init__(SET_TOKENS_REQUEST_MESSAGE_TYPE)
+        self.tokens = tokens
 
     def serialize(self):
-        categories = []
-        for category in self.categories:
-            categories.append(category.serialize())
+        tokens = []
+        for category in self.tokens:
+            tokens.append(category.serialize())
 
         return self.to_json({
-            SET_TODOIST_CATEGORIES_REQUEST_CATEGORIES_PROPERTY: categories,
+            SET_TOKENS_REQUEST_CATEGORIES_PROPERTY: tokens,
         })
 
     @staticmethod
     def deserialize(payload):
-        raw_categories = payload[SET_TODOIST_CATEGORIES_REQUEST_CATEGORIES_PROPERTY]
-        categories: list[CategoryModel] = []
-        for category in raw_categories:
-            categories.append(CategoryModel.deserialize(category))
+        raw_tokens = payload[SET_TOKENS_REQUEST_CATEGORIES_PROPERTY]
+        tokens: list[TokenModel] = []
+        for category in raw_tokens:
+            tokens.append(TokenModel.deserialize(category))
 
-        return SetTodoistCategoriesRequest(categories)
+        return SetTokensRequest(tokens)

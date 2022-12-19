@@ -23,7 +23,7 @@ class GetDayEventsRequestExecutor(BaseExecutor):
         date_time = convert_rawdate_to_datetime(f'{year}/{month}/{day}')
         date_time = date_time.replace(tzinfo=datetime.timezone.utc)
 
-        request = GetEventsByDateRequest(date_time).to_json()
+        request = GetEventsByDateRequest(date_time)
         response: StatusResponse = self.rpcPublisher.call(OUTLOOK_QUEUE, request)
         result = DayEventsResponse(response.status)
 

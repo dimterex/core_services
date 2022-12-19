@@ -2,6 +2,8 @@ import os
 import sqlite3
 
 from log_viewer.messages.LogModel import LogModel
+from modules.core.log_service.log_service import Logger_Service
+from modules.core.sqlite.base_storage import BaseStorage
 
 LOG_DATABASE_NAME = 'log_storage.db'
 TABLE_NAME = 'messages'
@@ -12,31 +14,18 @@ APPLICATION_COLUMN_NAME = 'application'
 DATATIME_COLUMN_NAME = 'datatime'
 
 
-class Log_Storage:
-    def __init__(self, path: str):
-        self.path = os.path.join(path, LOG_DATABASE_NAME)
-        self.create_database()
+class Log_Storage(BaseStorage):
+    def __init__(self, path: str, logger: Logger_Service):
+        super().__init__(logger, os.path.join(path, LOG_DATABASE_NAME))
 
-    def create_database(self):
-        try:
-            sqlite_connection = sqlite3.connect(self.path)
-            cursor = sqlite_connection.cursor()
-            cursor.close()
-            sqlite_create_table_query = f'''CREATE TABLE {TABLE_NAME} (
+    def get_create_table_request(self) -> str:
+        return f'''CREATE TABLE {TABLE_NAME} (
                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 {MESSAGE_COLUMN_NAME} TEXT NOT NULL,
                                 {LEVEL_COLUMN_NAME} TEXT NOT NULL,
                                 {TAG_COLUMN_NAME} TEXT NOT NULL,
                                 {APPLICATION_COLUMN_NAME} TEXT NOT NULL,
                                 {DATATIME_COLUMN_NAME} TEXT NOT NULL);'''
-            cursor = sqlite_connection.cursor()
-            cursor.execute(sqlite_create_table_query)
-            sqlite_connection.commit()
-        except Exception as e:
-            print(e)
-        finally:
-            if sqlite_connection:
-                sqlite_connection.close()
 
     def add_log(self, log_model: LogModel):
         try:
@@ -65,7 +54,7 @@ class Log_Storage:
                 sqlite_connection.close()
                 print("Соединение с SQLite закрыто")
 
-    def read_limited_rows(self, application_name: str, row_count: int):
+    def read_limited_rows(self, application_name: str, row_count: int) -> list[LogModel]:
         try:
             sqlite_connection = sqlite3.connect(self.path)
             cursor = sqlite_connection.cursor()

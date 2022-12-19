@@ -11,9 +11,6 @@ class Configuration:
         self.email = obj['email']
         self.domain = obj['domain']
 
-        self.jira = obj['jira_url']
-        self.redmine = obj['redmine_url']
-        self.outlook = obj['outlook_url']
         self.confluence = obj['confluence_url']
 
         self.ignore = obj['ignore']

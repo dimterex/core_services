@@ -1,14 +1,15 @@
+import json
 from functools import lru_cache
 from urllib.parse import parse_qs, urlparse
 
 
 class Http_Request:
-    def __init__(self, method, target, version, headers, rfile):
+    def __init__(self, method: str, target: str, version:str, headers, body: object):
         self.method = method
         self.target = target
         self.version = version
         self.headers = headers
-        self.rfile = rfile
+        self.body = body
 
     @property
     def path(self):
@@ -23,9 +24,3 @@ class Http_Request:
     @lru_cache(maxsize=None)
     def url(self):
         return urlparse(self.target)
-
-    def body(self):
-        size = self.headers.get('Content-Length')
-        if not size:
-            return None
-        return self.rfile.read(size)

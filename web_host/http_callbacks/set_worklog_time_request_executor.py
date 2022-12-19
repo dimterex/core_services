@@ -22,7 +22,7 @@ class SetWorklogTimeRequestExecutor(BaseExecutor):
         day = int(req.query["day"][0])
 
         date_time = convert_rawdate_to_datetime(f'{year}/{month}/{day}')
-        request = Write_Worklog_Request(date_time).to_json()
+        request = Write_Worklog_Request(date_time)
         response = self.rpcPublisher.call(WORKLOG_QUEUE, request)
 
         result = SetWorklogResponse(response.status)

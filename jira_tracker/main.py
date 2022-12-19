@@ -6,42 +6,41 @@ from jira_tracker.handlers.create_subtask_request_handler import CreateSubtaskRe
 from jira_tracker.handlers.get_worklogs_request_handler import GetWorklogsRequestHandler
 from jira_tracker.handlers.write_worklog_request_handler import WriteWorklogRequestHandler
 from jira_tracker.jira_connection import Jira_Connection
-from modules.core.rabbitmq.messages.identificators import LOGGER_QUEUE, JIRA_QUEUE
-from modules.core.rabbitmq.publisher import Publisher
+from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
+from modules.core.rabbitmq.messages.configuration.credentials.get_credentials_request import GetCredentialsRequest
+from modules.core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
+from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, JIRA_QUEUE, JIRA_URL_TYPE
+from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
 from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
 from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
-from modules.models.configuration import Configuration
+from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from modules.core.log_service.log_service import Logger_Service
 
-SETTINGS_FILE = 'settings.json'
-HOST_ENVIRON = 'RABBIT_HOST'
-PORT_ENVIRON = 'RABBIT_PORT'
+RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 
 
 def main():
-    host = os.environ[HOST_ENVIRON]
-    raw_port = os.environ[PORT_ENVIRON]
-    port = int(raw_port)
+    ampq_url = os.environ[RABBIT_CONNECTION_STRING]
+    logger_service = Logger_Service()
 
-    logger_service = Logger_Service('Jira_application')
-    ampq_url = f'amqp://guest:guest@{host}:{port}'
-    publisher = Publisher(ampq_url)
+    rpc_publisher = RpcPublisher(ampq_url)
+    credentials_response = rpc_publisher.call(CONFIGURATION_QUEUE, GetCredentialsRequest())
 
-    def send_log(log_message):
-        publisher.send_message(LOGGER_QUEUE, log_message.to_json())
+    if credentials_response.status == ERROR_STATUS_CODE:
+        raise Exception(credentials_response.message)
 
-    logger_service.configure_action(send_log)
+    credentials = CredentialModel.deserialize(credentials_response.message)
+    get_url_response = rpc_publisher.call(CONFIGURATION_QUEUE, GetUrlRequest(JIRA_URL_TYPE))
 
-    with open(SETTINGS_FILE, 'r', encoding='utf8') as json_file:
-        raw_data = json_file.read()
-        configuration = Configuration(raw_data)
+    if get_url_response.status == ERROR_STATUS_CODE:
+        raise Exception(get_url_response.message)
 
-    jira_connection = Jira_Connection(configuration.jira, configuration.login, configuration.password, logger_service)
+    jira_connection = Jira_Connection(credentials, str(get_url_response.message))
 
     api_controller = RpcApiController(logger_service)
     api_controller.subscribe(WriteWorklogRequestHandler(jira_connection, logger_service))
-    api_controller.subscribe(GetWorklogsRequestHandler(jira_connection, logger_service))
-    api_controller.subscribe(CreateSubtaskRequestHandler(jira_connection, logger_service))
+    api_controller.subscribe(GetWorklogsRequestHandler(credentials, jira_connection, logger_service))
+    api_controller.subscribe(CreateSubtaskRequestHandler(credentials, jira_connection, logger_service))
     rcp = RpcConsumer(ampq_url, JIRA_QUEUE, api_controller)
     rcp.start()
 

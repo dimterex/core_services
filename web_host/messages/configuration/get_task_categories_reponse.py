@@ -1,7 +1,7 @@
 from web_host.messages.base_response import BaseResponse
 
 
-class MeetingCategoriesResponse(BaseResponse):
+class TaskCategoriesResponse(BaseResponse):
     def __init__(self, status: str, categories: list[dict] = None, exception: str = None):
         super().__init__(status, exception)
         self.categories = categories

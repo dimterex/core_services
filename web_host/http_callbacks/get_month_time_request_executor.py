@@ -21,20 +21,20 @@ class GetMonthTimeRequestExecutor(BaseExecutor):
 
     def generate(self, req: Http_Request) -> Http_Response:
         start = datetime.datetime.now()
-        print(f'start time = {start}')
 
         month = int(req.query["month"][0])
         year = int(req.query["year"][0])
         isForce = req.query["force"][0] == 'true'
 
         response = self.get_cache(start, year, month, isForce)
-        end = datetime.datetime.now()
-        print(f'end time = {end}')
-        print(f'diff = {end - start}')
-
         return self.generate_success('application/json; charset=utf-8', response)
 
     def get_cache(self, request_time: datetime, year: int, month: int, isForce: bool) -> MonthTimesResponse:
+        if year in self.last_request:
+            if month in self.last_request[year]:
+                if self.last_request[year][month].status == ERROR_STATUS_CODE:
+                    isForce = True
+
         if isForce:
             self.update_cache(year, month)
             self.next_request_time = request_time + datetime.timedelta(seconds=self.cache_period_time)
@@ -60,7 +60,7 @@ class GetMonthTimeRequestExecutor(BaseExecutor):
         if year not in self.last_request:
             self.last_request[year] = {}
 
-        request = GetWorklogsRequest(year, month).to_json()
+        request = GetWorklogsRequest(year, month)
         response = self.rpcPublisher.call(JIRA_QUEUE, request)
         result = MonthTimesResponse(response.status)
         if result.status == SUCCESS_STATUS_CODE:

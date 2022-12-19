@@ -12,5 +12,5 @@ class Log_Service:
     def get_applications(self):
         return self.log_storage.get_applications()
 
-    def get_logs_by_application(self, application: str):
-        return self.log_storage.read_limited_rows(application, 100)
+    def get_logs_by_application(self, application: str, row_count: int = 100) -> list[LogModel]:
+        return self.log_storage.read_limited_rows(application, row_count)

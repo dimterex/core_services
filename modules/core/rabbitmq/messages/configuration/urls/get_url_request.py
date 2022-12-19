@@ -5,7 +5,6 @@ GET_URL_REQUEST_URL_TYPE = 'type'
 
 
 class GetUrlRequest(BaseMessage):
-
     def __init__(self, url_type: str):
         super().__init__(GET_URL_REQUEST_MESSAGE_TYPE)
         self.url_type = url_type

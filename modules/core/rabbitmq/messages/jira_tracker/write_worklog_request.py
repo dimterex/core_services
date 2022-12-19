@@ -1,20 +1,16 @@
-import json
-
-from modules.core.rabbitmq.messages.identificators import MESSAGE_PAYLOAD, MESSAGE_TYPE
+from modules.core.rabbitmq.messages.base_request import BaseMessage
 
 WRITE_WORKLOG_REQUEST_MESSAGE_TYPE = 'write_worklog_request'
 WRITE_WORKLOG_REQUEST_WORKLOGS = 'worklogs'
 
 
-class WriteWorklogsRequest:
+class WriteWorklogsRequest(BaseMessage):
+
     def __init__(self, worklogs: []):
+        super().__init__(WRITE_WORKLOG_REQUEST_MESSAGE_TYPE)
         self.worklogs = worklogs
 
-    def to_json(self):
-        dict_object = {
-            MESSAGE_TYPE: WRITE_WORKLOG_REQUEST_MESSAGE_TYPE,
-            MESSAGE_PAYLOAD: {
-                WRITE_WORKLOG_REQUEST_WORKLOGS: self.worklogs,
-            }
-        }
-        return json.dumps(dict_object)
+    def serialize(self) -> dict:
+        return self.to_json({
+            WRITE_WORKLOG_REQUEST_WORKLOGS: self.worklogs,
+        })

@@ -1,22 +1,19 @@
-import json
 from datetime import datetime
 
-from modules.core.rabbitmq.messages.identificators import MESSAGE_TYPE, MESSAGE_PAYLOAD
+from modules.core.rabbitmq.messages.base_request import BaseMessage
 
 GET_HISTORY_BY_DATE_REQUEST_TYPE = 'get_history_request'
 GET_HISTORY_BY_DATE_REQUEST_DAY_PROPERTY = 'day'
 
 
-class GetHistoryByDateRequest:
+class GetHistoryByDateRequest(BaseMessage):
+
     def __init__(self, start_day: datetime):
+        super().__init__(GET_HISTORY_BY_DATE_REQUEST_TYPE)
         self.start_day = start_day
 
-    def to_json(self):
-        dict_object = {
-            MESSAGE_TYPE: GET_HISTORY_BY_DATE_REQUEST_TYPE,
-            MESSAGE_PAYLOAD: {
-                GET_HISTORY_BY_DATE_REQUEST_DAY_PROPERTY: str(self.start_day),
-            }
-        }
-        return json.dumps(dict_object)
+    def serialize(self) -> dict:
+        return self.to_json({
+            GET_HISTORY_BY_DATE_REQUEST_DAY_PROPERTY: str(self.start_day),
+        })
 
