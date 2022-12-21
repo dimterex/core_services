@@ -5,3 +5,4 @@ discord
 exchangelib
 jira
 websocket_server
+aiohttp

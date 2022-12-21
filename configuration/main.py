@@ -4,7 +4,13 @@ import warnings
 
 from configuration.database.configuration_storage import ConfigurationStorage
 from configuration.handlers.credentials.get_credentials_request_handler import GetCredentialsRequestHandler
+from configuration.handlers.periodical_tasks.get_periodical_tasks_request_handler import \
+    GetPeriodicalTasksRequestHandler
+from configuration.handlers.periodical_tasks.set_periodical_tasks_request_handler import \
+    SetPeriodicalTasksRequestHandler
+from configuration.handlers.tokens.get_token_request_handler import GetTokenRequestHandler
 from configuration.handlers.tokens.get_tokens_request_handler import GetTokensRequestHandler
+from configuration.handlers.tokens.set_token_request_handler import SetTokenRequestHandler
 from configuration.handlers.tokens.set_tokens_request_handler import SetTokensRequestHandler
 from configuration.handlers.urls.get_url_request_handler import GetUrlRequestHandler
 from configuration.handlers.credentials.set_credentials_request_handler import SetCredentialsRequestHandler
@@ -51,7 +57,12 @@ def main():
     api_controller.subscribe(SetTodoitsCategoriesRequestHandler(storage))
 
     api_controller.subscribe(GetTokensRequestHandler(storage))
+    api_controller.subscribe(GetTokenRequestHandler(storage))
     api_controller.subscribe(SetTokensRequestHandler(storage))
+    api_controller.subscribe(SetTokenRequestHandler(storage))
+
+    api_controller.subscribe(GetPeriodicalTasksRequestHandler(storage))
+    api_controller.subscribe(SetPeriodicalTasksRequestHandler(storage))
 
     rcp = RpcConsumer(ampq_url, CONFIGURATION_QUEUE, api_controller)
     rcp.start()

@@ -35,4 +35,3 @@ class UpdateLabelRequestHandler(RpcBaseHandler):
         status_message = f'Label {task_label} added to {task_id}'
         self.logger_service.debug(self.TAG, status_message)
         return StatusResponse(status_message)
-

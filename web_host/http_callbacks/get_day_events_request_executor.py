@@ -1,10 +1,11 @@
 import datetime
-import json
+from typing import Awaitable
+
+from aiohttp.abc import Request
+from aiohttp.web_response import StreamResponse
 
 from modules.core.helpers.helper import convert_rawdate_to_datetime
 from modules.core.http_server.base_executor import BaseExecutor
-from modules.core.http_server.http_request import Http_Request
-from modules.core.http_server.http_response import Http_Response
 from modules.core.rabbitmq.messages.identificators import OUTLOOK_QUEUE
 from modules.core.rabbitmq.messages.outlook.get_events_by_date_request import GetEventsByDateRequest
 from modules.core.rabbitmq.messages.status_response import StatusResponse, SUCCESS_STATUS_CODE
@@ -16,10 +17,10 @@ class GetDayEventsRequestExecutor(BaseExecutor):
     def __init__(self, rpcPublisher: RpcPublisher):
         self.rpcPublisher = rpcPublisher
 
-    def generate(self, req: Http_Request) -> Http_Response:
-        month = int(req.query["month"][0])
-        year = int(req.query["year"][0])
-        day = int(req.query["day"][0])
+    async def execute(self, request: Request) -> Awaitable[StreamResponse]:
+        month = int(request.query["month"])
+        year = int(request.query["year"])
+        day = int(request.query["day"])
         date_time = convert_rawdate_to_datetime(f'{year}/{month}/{day}')
         date_time = date_time.replace(tzinfo=datetime.timezone.utc)
 
@@ -32,5 +33,4 @@ class GetDayEventsRequestExecutor(BaseExecutor):
         else:
             result.exception = response.message
 
-        contentType = 'application/json; charset=utf-8'
-        return self.generate_success(contentType, result)
+        return BaseExecutor.generate_response(result)

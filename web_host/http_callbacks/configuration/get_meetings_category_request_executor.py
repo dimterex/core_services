@@ -1,6 +1,9 @@
+from typing import Awaitable
+
+from aiohttp.abc import Request
+from aiohttp.web_response import StreamResponse
+
 from modules.core.http_server.base_executor import BaseExecutor
-from modules.core.http_server.http_request import Http_Request
-from modules.core.http_server.http_response import Http_Response
 from modules.core.rabbitmq.messages.configuration.meeting_categories.get_meeting_categories_request import GetMeetingCategoriesRequest
 from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
 from modules.core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE
@@ -12,7 +15,7 @@ class GetMeetingsCategoryRequestExecutor(BaseExecutor):
     def __init__(self, rpcPublisher: RpcPublisher):
         self.rpcPublisher = rpcPublisher
 
-    def generate(self, req: Http_Request) -> Http_Response:
+    async def execute(self, request: Request) -> Awaitable[StreamResponse]:
         response = self.rpcPublisher.call(CONFIGURATION_QUEUE, GetMeetingCategoriesRequest())
 
         result = MeetingCategoriesResponse(response.status)
@@ -22,5 +25,4 @@ class GetMeetingsCategoryRequestExecutor(BaseExecutor):
         else:
             result.exception = response.message
 
-        contentType = 'application/json; charset=utf-8'
-        return self.generate_success(contentType, result)
+        return BaseExecutor.generate_response(result)

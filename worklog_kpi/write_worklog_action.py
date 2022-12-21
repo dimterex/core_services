@@ -17,9 +17,7 @@ from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from modules.core.rabbitmq.messages.jira_tracker.create_subtask_request import CreateSubTaskRequest
 from modules.core.rabbitmq.messages.jira_tracker.write_worklog_request import WriteWorklogsRequest
 from modules.core.rabbitmq.messages.todoist.update_label_request import UpdateLabelRequest
-from modules.models.configuration import Configuration
 from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.publisher import Publisher
 from outlook.models.outlook_meeting import GET_CALENDAR_BY_DATE_RESPONSE_EVENT_CATEGORIES_PROPERTY, \
     GET_CALENDAR_BY_DATE_RESPONSE_EVENT_NAME_PROPERTY, GET_CALENDAR_BY_DATE_RESPONSE_EVENT_START_TIME_PROPERTY, \
     GET_CALENDAR_BY_DATE_RESPONSE_EVENT_DURATION_PROPERTY
@@ -35,23 +33,19 @@ NEEDS_HOURS = 8
 
 class Write_WorkLok_Action:
     def __init__(self,
-                 configuration: Configuration,
-                 publisher: Publisher,
+                 rpc_publisher: RpcPublisher,
                  logger_service: Logger_Service,
                  storage: WorklogStorageService):
         self.storage = storage
         self.logger_service = logger_service
-        self.publisher = publisher
-        self.configuration = configuration
         self.jira_create_task = {}
-        self.rpc_publisher = RpcPublisher(self.publisher._url)
+        self.rpc_publisher = rpc_publisher
         self.TAG = self.__class__.__name__
         get_url_response = self.rpc_publisher.call(CONFIGURATION_QUEUE, GetUrlRequest(JIRA_URL_TYPE))
 
         if get_url_response.status == ERROR_STATUS_CODE:
             raise Exception(get_url_response.message)
         self.jira_url: str = str(get_url_response.message)
-
 
     def write(self, start_time: datetime.datetime) -> StatusResponse:
         self.logger_service.debug(self.TAG, 'Send result message')
@@ -194,4 +188,4 @@ class Write_WorkLok_Action:
         self.logger_service.debug(self.TAG, str(update_label_response.to_json()))
 
     def write_sync(self, start_time: datetime.datetime, worklogs_service: Worklog_Service):
-        Worklog_By_Periodical(self.configuration, start_time, worklogs_service, self.logger_service).modify()
+        Worklog_By_Periodical(start_time, self.rpc_publisher, worklogs_service, self.logger_service).modify()

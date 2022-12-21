@@ -59,7 +59,7 @@ class GetCompletedTasksRequestHandler(RpcBaseHandler):
         for task_id in Todoist_Tasks(tasks).items:
             taskInfo: Task = self.todoistAPI.get_task(task_id)
             self.logger_service.trace(self.TAG, str(taskInfo))
-            if taskInfo.section_id == 0:
+            if taskInfo.section_id == 0 or taskInfo.section_id is None:
                 sectionInfo = self.todoistAPI.get_section(83787255)
             else:
                 sectionInfo = self.todoistAPI.get_section(taskInfo.section_id)

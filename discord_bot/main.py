@@ -6,25 +6,31 @@ from actions.write_worklog_action import Write_Worklog_Action
 from discord_bot.bot.discord_bot import Discord_Bot
 from discord_bot.bot.command_controller import Command_Controller, NEXT_MEETING_COMMAND, WRITE_LOG_COMMAND
 from modules.core.log_service.log_service import Logger_Service
+from modules.core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
+from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from modules.core.rabbitmq.api_controller import Api_Controller
-from modules.core.rabbitmq.messages.identificators import DISCORD_SEND_MESSAGE, DISCORD_QUEUE
+from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, DISCORD_SEND_MESSAGE, DISCORD_QUEUE, \
+    DISCORD_TOKEN
 from modules.core.rabbitmq.publisher import Publisher
 from modules.core.rabbitmq.receive import Consumer
 
-DISCORD_TOKEN = 'DISCORD_TOKEN'
 RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 
 
 if __name__ == '__main__':
     print('Starting')
     ampq_url = os.environ[RABBIT_CONNECTION_STRING]
-    discord_token = os.environ[DISCORD_TOKEN]
 
     logger_service = Logger_Service()
     api_controller = Api_Controller(logger_service)
     publisher = Publisher(ampq_url)
     rpc_publisher = RpcPublisher(ampq_url)
+
+    token_response = rpc_publisher.call(CONFIGURATION_QUEUE, GetTokenRequest(DISCORD_TOKEN))
+
+    if token_response.status == ERROR_STATUS_CODE:
+        raise Exception(token_response.message)
 
     consumer = Consumer(ampq_url, DISCORD_QUEUE, api_controller, logger_service)
 
@@ -44,5 +50,5 @@ if __name__ == '__main__':
 
     loop = asyncio.get_event_loop()
     print('Started')
-    coro = loop.run_in_executor(None, discord_Bot.bot.run(discord_token))
+    coro = loop.run_in_executor(None, discord_Bot.bot.run(token_response.message))
     loop.run_until_complete(coro)

@@ -29,10 +29,21 @@ class GetWorklogsRequestHandler(RpcBaseHandler):
         jira = self.jira.connect_to_jira()
         day_statistics: list[dict] = []
 
+        start_time = datetime.now()
+
+        self.logger_service.trace(self.TAG, f'Starting time for calc: {start_time}')
+
         for day in range(1, num_days+1):
             targetDay = datetime(year, month, day)
             nextDay = targetDay + timedelta(days=1)
+
+            start_issues_time = datetime.now()
+            self.logger_service.trace(self.TAG, f'Starting time for search_issues: {start_issues_time}')
+
             issues = jira.search_issues(f'worklogAuthor = "{userName}" AND worklogDate >= "{targetDay.strftime("%Y/%m/%d")}" AND worklogDate < "{nextDay.strftime("%Y/%m/%d")}"')
+
+            end_issues_time = datetime.now()
+            self.logger_service.trace(self.TAG, f'End time for search_issues: {end_issues_time}. Diff: {end_issues_time - start_issues_time}')
 
             worklogs = []
             for issue in issues:
@@ -46,6 +57,8 @@ class GetWorklogsRequestHandler(RpcBaseHandler):
 
                 if len(filtredIssueWorklogs) > 0:
                     worklogs.extend(filtredIssueWorklogs)
+            end_worklogs_time = datetime.now()
+            self.logger_service.trace(self.TAG, f'End time for worklogs: {end_worklogs_time}. Diff: {end_worklogs_time - end_issues_time}')
 
             sum_timespent = 0
             if len(worklogs) != 0:
@@ -54,6 +67,10 @@ class GetWorklogsRequestHandler(RpcBaseHandler):
 
             day_statistics.append(WorklogDay(targetDay, sum_timespent).to_json())
         jira.close()
+
+        end_time = datetime.now()
+        self.logger_service.trace(self.TAG, f'Ending time for calc: {end_time}')
+        self.logger_service.trace(self.TAG, f'Diff time for calc: {end_time - start_time}')
         self.logger_service.debug(self.TAG, f'Disconnected to jira for get time... Result: {day_statistics}')
         return StatusResponse(day_statistics)
 

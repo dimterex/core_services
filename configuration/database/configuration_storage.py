@@ -3,6 +3,7 @@ import os
 from modules.core.log_service.log_service import Logger_Service
 from modules.core.rabbitmq.messages.configuration.category_model import CategoryModel
 from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
+from modules.core.rabbitmq.messages.configuration.periodical_task_model import PeriodicalTaskModel
 from modules.core.rabbitmq.messages.configuration.token_model import TokenModel
 from modules.core.rabbitmq.messages.configuration.url_model import UrlModel
 from modules.core.sqlite.base_storage import BaseStorage
@@ -43,6 +44,13 @@ TOKENS_NAME_COLUMN_NAME = 'name'
 TOKENS_KEY_COLUMN_NAME = 'key'
 # ------------------------------
 
+# ----- Periodical tasks ------
+PERIODICAL_TASKS_TABLE_NAME = 'periodical_task'
+PERIODICAL_TASKS_NAME_COLUMN_NAME = 'name'
+PERIODICAL_TASKS_TRACKER_ID_COLUMN_NAME = 'tracker_id'
+PERIODICAL_TASKS_DURATION_COLUMN_NAME = 'duration'
+# ------------------------------
+
 
 class ConfigurationStorage(BaseStorage):
     def __init__(self, path: str, logger: Logger_Service):
@@ -64,7 +72,7 @@ class ConfigurationStorage(BaseStorage):
         meeting_categories_table = f'''CREATE TABLE IF NOT EXISTS {MEETING_CATEGORIES_TABLE_NAME} (
                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 {MEETING_CATEGORIES_NAME_COLUMN_NAME} TEXT NOT NULL,
-                                {MEETING_CATEGORIES_TRACKER_ID_COLUMN_NAME} TEXT NOT NULL,
+                                {MEETING_CATEGORIES_TRACKER_ID_COLUMN_NAME} TEXT NULL,
                                 {MEETING_CATEGORIES_LINK_COLUMN_NAME} TEXT NULL);'''
 
         todoist_categories_table = f'''CREATE TABLE IF NOT EXISTS {TODOIST_LABELS_TABLE_NAME} (
@@ -78,7 +86,18 @@ class ConfigurationStorage(BaseStorage):
                                 {TOKENS_NAME_COLUMN_NAME} TEXT NOT NULL,
                                 {TOKENS_KEY_COLUMN_NAME} TEXT NOT NULL);'''
 
-        return [credentials_table, urls_table, meeting_categories_table, todoist_categories_table, tokens_table]
+        periodical_tasks_table = f'''CREATE TABLE IF NOT EXISTS {PERIODICAL_TASKS_TABLE_NAME} (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                {PERIODICAL_TASKS_NAME_COLUMN_NAME} TEXT NOT NULL,
+                                {PERIODICAL_TASKS_TRACKER_ID_COLUMN_NAME} TEXT NOT NULL,
+                                {PERIODICAL_TASKS_DURATION_COLUMN_NAME} NUMERIC NOT NULL);'''
+
+        return [credentials_table,
+                urls_table,
+                meeting_categories_table,
+                todoist_categories_table,
+                tokens_table,
+                periodical_tasks_table]
 
     def get_credentials(self) -> CredentialModel:
         sqlite_select_query = f'SELECT {CREDENTIALS_LOGIN_COLUMN_NAME}, {CREDENTIALS_EMAIL_COLUMN_NAME}, {CREDENTIALS_DOMAIN_COLUMN_NAME}, {CREDENTIALS_PASSWORD_COLUMN_NAME} '
@@ -95,6 +114,25 @@ class ConfigurationStorage(BaseStorage):
         password = result[3]
 
         return CredentialModel(login, email, domain, password)
+
+    def set_credentials(self, credentials: CredentialModel):
+        query = f'DELETE FROM {CREDENTIALS_TABLE_NAME}'
+        self.remove(query)
+
+        query = f'''INSERT INTO {CREDENTIALS_TABLE_NAME} 
+                ({CREDENTIALS_LOGIN_COLUMN_NAME}, {CREDENTIALS_DOMAIN_COLUMN_NAME}, {CREDENTIALS_EMAIL_COLUMN_NAME}, {CREDENTIALS_PASSWORD_COLUMN_NAME})
+                VALUES
+                (:{CREDENTIALS_LOGIN_COLUMN_NAME}, :{CREDENTIALS_DOMAIN_COLUMN_NAME}, :{CREDENTIALS_EMAIL_COLUMN_NAME}, :{CREDENTIALS_PASSWORD_COLUMN_NAME})
+            '''
+
+        params = {
+            CREDENTIALS_LOGIN_COLUMN_NAME: credentials.login,
+            CREDENTIALS_DOMAIN_COLUMN_NAME: credentials.domain,
+            CREDENTIALS_EMAIL_COLUMN_NAME: credentials.email,
+            CREDENTIALS_PASSWORD_COLUMN_NAME: credentials.password,
+        }
+
+        self.insert(query, params)
 
     def get_meeting_categories(self) -> list[CategoryModel]:
         query = f'''SELECT {MEETING_CATEGORIES_NAME_COLUMN_NAME}, {MEETING_CATEGORIES_TRACKER_ID_COLUMN_NAME}, {MEETING_CATEGORIES_LINK_COLUMN_NAME} from {MEETING_CATEGORIES_TABLE_NAME}'''
@@ -158,10 +196,38 @@ class ConfigurationStorage(BaseStorage):
             models.append(TokenModel(row[0], row[1]))
         return models
 
-    def set_tokens(self, categories: list[TokenModel]):
+    def get_token(self, key: str) -> str:
+        query = f'''SELECT {TOKENS_KEY_COLUMN_NAME} from {TOKENS_TABLE_NAME} 
+         where {TOKENS_NAME_COLUMN_NAME} = "{key}"
+         ORDER BY id DESC LIMIT {1}
+        '''
+        result = self.get_first(query)
+        if result is None:
+            raise Exception(f'Can not find url for {key}')
+
+        return result[0]
+
+    def set_token(self, token: TokenModel):
+        query = f'DELETE FROM {TOKENS_TABLE_NAME} WHERE {TOKENS_NAME_COLUMN_NAME} = "{token.name}"'
+        self.remove(query)
+
+        query = f'''INSERT INTO {TOKENS_TABLE_NAME} 
+                    ({TOKENS_NAME_COLUMN_NAME}, {TOKENS_KEY_COLUMN_NAME})
+                    VALUES
+                    (:{TOKENS_NAME_COLUMN_NAME}, :{TOKENS_KEY_COLUMN_NAME})
+                '''
+
+        params = {
+            TOKENS_NAME_COLUMN_NAME: token.name,
+            TOKENS_KEY_COLUMN_NAME: token.key,
+        }
+
+        self.insert(query, params)
+
+    def set_tokens(self, tokens: list[TokenModel]):
         query = f'DELETE FROM {TOKENS_TABLE_NAME}'
         self.remove(query)
-        for category in categories:
+        for token in tokens:
             query = f'''INSERT INTO {TOKENS_TABLE_NAME} 
                     ({TOKENS_NAME_COLUMN_NAME}, {TOKENS_KEY_COLUMN_NAME})
                     VALUES
@@ -169,20 +235,45 @@ class ConfigurationStorage(BaseStorage):
                 '''
 
             params = {
-                TOKENS_NAME_COLUMN_NAME: category.name,
-                TOKENS_KEY_COLUMN_NAME: category.key,
+                TOKENS_NAME_COLUMN_NAME: token.name,
+                TOKENS_KEY_COLUMN_NAME: token.key,
+            }
+
+            self.insert(query, params)
+
+    def get_periodical_tasks(self) -> list[PeriodicalTaskModel]:
+        query = f'''SELECT {PERIODICAL_TASKS_NAME_COLUMN_NAME}, {PERIODICAL_TASKS_TRACKER_ID_COLUMN_NAME}, {PERIODICAL_TASKS_DURATION_COLUMN_NAME} from {PERIODICAL_TASKS_TABLE_NAME}'''
+        data = self.get_data(query)
+        models = []
+        for row in data:
+            models.append(PeriodicalTaskModel(row[0], row[1], row[2]))
+        return models
+
+    def set_periodical_tasks(self, tasks: list[PeriodicalTaskModel]):
+        query = f'DELETE FROM {PERIODICAL_TASKS_TABLE_NAME}'
+        self.remove(query)
+        for task in tasks:
+            query = f'''INSERT INTO {PERIODICAL_TASKS_TABLE_NAME} 
+                        ({PERIODICAL_TASKS_NAME_COLUMN_NAME}, {PERIODICAL_TASKS_TRACKER_ID_COLUMN_NAME}, {PERIODICAL_TASKS_DURATION_COLUMN_NAME})
+                        VALUES
+                        (:{PERIODICAL_TASKS_NAME_COLUMN_NAME}, :{PERIODICAL_TASKS_TRACKER_ID_COLUMN_NAME}, :{PERIODICAL_TASKS_DURATION_COLUMN_NAME})
+                    '''
+
+            params = {
+                PERIODICAL_TASKS_NAME_COLUMN_NAME: task.name,
+                PERIODICAL_TASKS_TRACKER_ID_COLUMN_NAME: task.tracker_id,
+                PERIODICAL_TASKS_DURATION_COLUMN_NAME: task.duration,
             }
 
             self.insert(query, params)
 
     def get_urls(self) -> list[UrlModel]:
-        query = f'''SELECT {TOKENS_NAME_COLUMN_NAME}, {TOKENS_KEY_COLUMN_NAME} from {TOKENS_TABLE_NAME}'''
+        query = f'''SELECT {URLS_KEY_COLUMN_NAME}, {URLS_VALUE_COLUMN_NAME} from {URLS_TABLE_NAME}'''
         data = self.get_data(query)
         models = []
         for row in data:
             models.append(UrlModel(row[0], row[1]))
         return models
-
 
     def get_url(self, url_type: str):
         query = f'''SELECT {URLS_VALUE_COLUMN_NAME} from {URLS_TABLE_NAME} 
@@ -211,22 +302,3 @@ class ConfigurationStorage(BaseStorage):
             }
 
             self.insert(query, params)
-
-    def set_credentials(self, credentials: CredentialModel):
-        query = f'DELETE FROM {CREDENTIALS_TABLE_NAME}'
-        self.remove(query)
-
-        query = f'''INSERT INTO {CREDENTIALS_TABLE_NAME} 
-                ({CREDENTIALS_LOGIN_COLUMN_NAME}, {CREDENTIALS_DOMAIN_COLUMN_NAME}, {CREDENTIALS_EMAIL_COLUMN_NAME}, {CREDENTIALS_PASSWORD_COLUMN_NAME})
-                VALUES
-                (:{CREDENTIALS_LOGIN_COLUMN_NAME}, :{CREDENTIALS_DOMAIN_COLUMN_NAME}, :{CREDENTIALS_EMAIL_COLUMN_NAME}, :{CREDENTIALS_PASSWORD_COLUMN_NAME})
-            '''
-
-        params = {
-            CREDENTIALS_LOGIN_COLUMN_NAME: credentials.login,
-            CREDENTIALS_DOMAIN_COLUMN_NAME: credentials.domain,
-            CREDENTIALS_EMAIL_COLUMN_NAME: credentials.email,
-            CREDENTIALS_PASSWORD_COLUMN_NAME: credentials.password,
-        }
-
-        self.insert(query, params)

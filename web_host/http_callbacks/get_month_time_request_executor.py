@@ -1,13 +1,13 @@
 import datetime
+from typing import Awaitable
+
+from aiohttp.abc import Request
+from aiohttp.web_response import StreamResponse
 
 from jira_tracker.main import JIRA_QUEUE
 from modules.core.http_server.base_executor import BaseExecutor
-from modules.core.http_server.http_request import Http_Request
-from modules.core.http_server.http_response import Http_Response
-from modules.core.rabbitmq.messages.identificators import MESSAGE_PAYLOAD
 from modules.core.rabbitmq.messages.jira_tracker.get_worklogs_request import GetWorklogsRequest
-from modules.core.rabbitmq.messages.status_response import STATUS_RESPONSE_STATUS_PROPERTY, ERROR_STATUS_CODE, \
-    StatusResponse, STATUS_RESPONSE_MESSAGE_PROPERTY, SUCCESS_STATUS_CODE
+from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, SUCCESS_STATUS_CODE
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from web_host.messages.get_month_times_response import MonthTimesResponse
 
@@ -19,15 +19,15 @@ class GetMonthTimeRequestExecutor(BaseExecutor):
         self.last_request: dict[int, dict[int]] = {}
         self.next_request_time = None
 
-    def generate(self, req: Http_Request) -> Http_Response:
+    async def execute(self, request: Request) -> Awaitable[StreamResponse]:
         start = datetime.datetime.now()
 
-        month = int(req.query["month"][0])
-        year = int(req.query["year"][0])
-        isForce = req.query["force"][0] == 'true'
+        month = int(request.query["month"])
+        year = int(request.query["year"])
+        isForce = request.query["force"] == 'true'
 
         response = self.get_cache(start, year, month, isForce)
-        return self.generate_success('application/json; charset=utf-8', response)
+        return BaseExecutor.generate_response(response)
 
     def get_cache(self, request_time: datetime, year: int, month: int, isForce: bool) -> MonthTimesResponse:
         if year in self.last_request:

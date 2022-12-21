@@ -1,31 +1,35 @@
 from datetime import datetime
 
-from modules.models.configuration import Configuration
-from modules.core.log_service.log_service import Logger_Service, DEBUG_LOG_LEVEL
-from modules.models.task_catogory import TasksCategory
+from modules.core.rabbitmq.messages.configuration.periodical_task_model import PeriodicalTaskModel
+from modules.core.rabbitmq.messages.configuration.periodical_tasks.get_periodical_tasks_request import \
+    GetPeriodicalTasksRequest
+from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
+from modules.core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE
+from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from modules.core.log_service.log_service import Logger_Service
 from worklog_kpi.services.worklog_service import Worklog_Service
 
 
 class Worklog_By_Periodical:
     def __init__(self,
-                 configuration: Configuration,
                  start_time: datetime,
+                 rpcPublisher: RpcPublisher,
                  worklog_service: Worklog_Service,
                  logger_service: Logger_Service):
+        self.rpcPublisher = rpcPublisher
         self.logger_service = logger_service
         self.worklog_service = worklog_service
-        self.configuration = configuration
         self.start_time = start_time
 
     def modify(self):
         self.logger_service.debug(self.__class__.__name__, 'Starting modify')
-        hours = 0.5
+        response = self.rpcPublisher.call(CONFIGURATION_QUEUE, GetPeriodicalTasksRequest())
 
-        for task in self.configuration.periodical:
-            if task not in self.configuration.meetings_categories:
-                self.configuration.meetings_categories[task] = TasksCategory(task.name, task.jira_issue_id)
-
-            category = self.configuration.meetings_categories[task]
-            self.worklog_service.add_worklog(task.name, self.start_time.replace(hour=7), category.jira_issue_id, hours)
-        self.worklog_service.from_config = True
-        self.logger_service.debug(self.__class__.__name__, 'Ending modify')
+        if response.status == SUCCESS_STATUS_CODE:
+            for rawTask in response.message:
+                task = PeriodicalTaskModel.deserialize(rawTask)
+                self.worklog_service.add_worklog(task.name, self.start_time.replace(hour=7), task.tracker_id, task.duration)
+            self.worklog_service.from_config = True
+            self.logger_service.debug(self.__class__.__name__, 'Ending modify')
+        else:
+            raise Exception(response.message)
