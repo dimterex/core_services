@@ -4,8 +4,7 @@ import time
 
 import pika
 
-from modules.core.log_service.log_service import Logger_Service, INFO_LOG_LEVEL, DEBUG_LOG_LEVEL, ERROR_LOG_LEVEL, \
-    WARNING_LOG_LEVEL
+from modules.core.log_service.log_service import Logger_Service
 from modules.core.rabbitmq.api_controller import Api_Controller
 
 

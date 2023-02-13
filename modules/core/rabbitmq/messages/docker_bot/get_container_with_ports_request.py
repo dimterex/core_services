@@ -1,19 +1,12 @@
 from modules.core.rabbitmq.messages.base_request import BaseMessage
 
-GET_WORKLOGS_REQUEST_MESSAGE_TYPE = 'get_worklogs_request'
-GET_WORKLOGS_REQUEST_YEAR = 'year'
-GET_WORKLOGS_REQUEST_MONTH = 'month'
+GET_CONTAINERS_WITH_PORTS_REQUEST_MESSAGE_TYPE = 'get_container_with_ports_request'
 
 
-class GetWorklogsRequest(BaseMessage):
+class GetContainerWithPortsRequest(BaseMessage):
 
-    def __init__(self, year: int, month: int):
-        super().__init__(GET_WORKLOGS_REQUEST_MESSAGE_TYPE)
-        self.year = year
-        self.month = month
+    def __init__(self):
+        super().__init__(GET_CONTAINERS_WITH_PORTS_REQUEST_MESSAGE_TYPE)
 
     def serialize(self) -> dict:
-        return self.to_json({
-            GET_WORKLOGS_REQUEST_YEAR: self.year,
-            GET_WORKLOGS_REQUEST_MONTH: self.month,
-        })
+        return self.to_json(None)

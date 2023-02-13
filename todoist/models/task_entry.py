@@ -9,7 +9,7 @@ class Task_Entry:
         self.date = date
         self.name = name
 
-    def to_json(self):
+    def serialize(self):
         return {
             "name": self.name,
             "category": self.category,

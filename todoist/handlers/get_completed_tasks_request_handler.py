@@ -38,7 +38,7 @@ class GetCompletedTasksRequestHandler(RpcBaseHandler):
             self.logger_service.debug(self.TAG, 'Ending modify')
             issues = []
             for issue in completed_tasks:
-                issues.append(issue.to_json())
+                issues.append(issue.serialize())
 
             return StatusResponse(issues)
 

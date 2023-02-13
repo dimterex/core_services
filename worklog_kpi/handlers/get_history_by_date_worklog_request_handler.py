@@ -19,7 +19,4 @@ class GetHistoryByDateWorklogRequestHandler(RpcBaseHandler):
         for m in message:
             result.append(m.description)
 
-        if len(result) > 1:
-            return StatusResponse('\n\n'.join(result))
-        else:
-            return StatusResponse(result)
+        return StatusResponse(result)

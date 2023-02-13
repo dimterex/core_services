@@ -9,7 +9,7 @@ MEETING_CATEGORIES_TRACKER_ID_COLUMN_NAME = 'tracker_id'
 MEETING_CATEGORIES_LINK_COLUMN_NAME = 'link'
 
 
-class meeting_categories_table(BaseTable):
+class MeetingCategoriesTable(BaseTable):
     def __init__(self, logger: Logger_Service, path: str):
         super().__init__(MEETING_CATEGORIES_TABLE_NAME, ID_COLUMN_NAME, logger, path)
 

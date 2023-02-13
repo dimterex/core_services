@@ -8,7 +8,7 @@ class MonthTimesResponse(BaseResponse):
         self.exception = exception
         self.status = status
 
-    def toJson(self) -> dict:
+    def serialize(self) -> dict:
         return {
             'status': self.status,
             'messages': self.messages,

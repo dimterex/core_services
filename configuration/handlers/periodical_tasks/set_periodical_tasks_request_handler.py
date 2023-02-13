@@ -1,4 +1,4 @@
-from configuration.database.configuration_storage import ConfigurationStorage
+from configuration.database.periodical_tasks_table import PeriodicalTasksTable
 from modules.core.rabbitmq.messages.configuration.periodical_tasks.set_periodical_tasks_request import \
     SET_PERIODICAL_TASKS_REQUEST_MESSAGE_TYPE, SetPeriodicalTasksRequest
 from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
@@ -6,7 +6,7 @@ from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class SetPeriodicalTasksRequestHandler(RpcBaseHandler):
-    def __init__(self, storage: ConfigurationStorage):
+    def __init__(self, storage: PeriodicalTasksTable):
         super().__init__(SET_PERIODICAL_TASKS_REQUEST_MESSAGE_TYPE)
         self.storage = storage
 

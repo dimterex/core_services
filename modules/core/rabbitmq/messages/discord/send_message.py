@@ -1,5 +1,6 @@
 from modules.core.rabbitmq.messages.base_request import BaseMessage
-from modules.core.rabbitmq.messages.identificators import DISCORD_SEND_MESSAGE
+
+DISCORD_SEND_MESSAGE = 'send_message'
 
 
 class Send_Message(BaseMessage):

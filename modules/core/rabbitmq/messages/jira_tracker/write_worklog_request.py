@@ -14,3 +14,8 @@ class WriteWorklogsRequest(BaseMessage):
         return self.to_json({
             WRITE_WORKLOG_REQUEST_WORKLOGS: self.worklogs,
         })
+
+    @staticmethod
+    def deserialize(payload):
+        worklogs = payload[WRITE_WORKLOG_REQUEST_WORKLOGS]
+        return WriteWorklogsRequest(worklogs)

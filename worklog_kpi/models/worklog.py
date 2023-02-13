@@ -8,7 +8,7 @@ class Worklog:
         self.date = date
         self.duration = duration
 
-    def to_json(self):
+    def serialize(self):
         dict = {
             "name": self.name,
             "date": str(self.date),

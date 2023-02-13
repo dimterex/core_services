@@ -6,7 +6,7 @@ class HistoryItemResponse(BaseResponse):
         super().__init__(status, exception)
         self.messages = messages
 
-    def toJson(self) -> dict:
+    def serialize(self) -> dict:
         return {
             'status': self.status,
             'messages': self.messages,

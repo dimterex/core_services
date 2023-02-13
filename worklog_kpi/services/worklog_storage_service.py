@@ -73,7 +73,7 @@ class WorklogStorageService:
             sqlite_select_query += f'from {TABLE_NAME} '
             sqlite_select_query += f'where {DATE_COLUMN_NAME} = "{date}" '
             for row in cursor.execute(sqlite_select_query):
-                result.append(WorklogSqliteModel(str(date), row))
+                result.append(WorklogSqliteModel(str(date), row[0]))
             cursor.close()
             return result
         except sqlite3.Error as error:

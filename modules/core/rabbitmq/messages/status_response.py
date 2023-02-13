@@ -1,5 +1,3 @@
-import json
-
 from modules.core.rabbitmq.messages.identificators import MESSAGE_PAYLOAD, MESSAGE_TYPE
 
 STATUS_RESPONSE_TYPE = 'status_response_type'
@@ -15,7 +13,7 @@ class StatusResponse:
         self.status = status
         self.message = message
 
-    def to_json(self) -> dict:
+    def serialize(self) -> dict:
         return {
             MESSAGE_TYPE: STATUS_RESPONSE_TYPE,
             MESSAGE_PAYLOAD: {
@@ -25,7 +23,7 @@ class StatusResponse:
         }
 
     @staticmethod
-    def from_json(json_dct):
+    def deserialize(json_dct):
         payload = json_dct[MESSAGE_PAYLOAD]
         status = payload[STATUS_RESPONSE_STATUS_PROPERTY]
         message = payload[STATUS_RESPONSE_MESSAGE_PROPERTY]

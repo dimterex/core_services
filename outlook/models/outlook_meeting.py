@@ -22,7 +22,7 @@ class Outlook_Meeting:
         self.description: str = raw_outlook_meeting.text_body
         self.location = raw_outlook_meeting.location
 
-    def to_json(self):
+    def serialize(self):
         difference = self.end - self.start
         dict_object = {
             GET_CALENDAR_BY_DATE_RESPONSE_EVENT_NAME_PROPERTY: self.name,

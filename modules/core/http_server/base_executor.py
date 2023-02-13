@@ -1,4 +1,3 @@
-import json
 from typing import Awaitable
 
 from aiohttp import web
@@ -14,4 +13,4 @@ class BaseExecutor:
 
     @staticmethod
     def generate_response(body: BaseResponse) -> Response:
-        return web.json_response(body.toJson())
+        return web.json_response(body.serialize())

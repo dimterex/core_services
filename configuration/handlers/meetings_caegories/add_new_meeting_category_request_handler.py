@@ -1,22 +1,19 @@
-from configuration.database.configuration_storage import ConfigurationStorage
-from modules.core.rabbitmq.messages.configuration.meeting_categories.get_meeting_categories_request import \
-    GET_MEETING_CATEGORIES_REQUEST_MESSAGE_TYPE
+from configuration.database.meeting_categories_table import MeetingCategoriesTable
+from modules.core.rabbitmq.messages.configuration.meeting_categories.add_new_meeting_category_request import \
+    ADD_NEW_MEETING_CATEGORY_REQUEST_MESSAGE_TYPE
 from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
 
 from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
-class GetMeetingCategoriesRequestHandler(RpcBaseHandler):
-    def __init__(self, storage: ConfigurationStorage):
-        super().__init__(GET_MEETING_CATEGORIES_REQUEST_MESSAGE_TYPE)
+class AddNewMeetingCategoryRequestHandler(RpcBaseHandler):
+    def __init__(self, storage: MeetingCategoriesTable):
+        super().__init__(ADD_NEW_MEETING_CATEGORY_REQUEST_MESSAGE_TYPE)
         self.storage = storage
 
     def execute(self, payload) -> StatusResponse:
         try:
-            categories = self.storage.get_meeting_categories()
-            js = []
-            for category in categories:
-                js.append(category.serialize())
-            return StatusResponse(js)
+            new_id = self.storage.add_new_meeting_category()
+            return StatusResponse(new_id)
         except Exception as e:
             return StatusResponse(e, ERROR_STATUS_CODE)

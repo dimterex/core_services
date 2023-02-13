@@ -16,15 +16,5 @@ TODOIST_TOKEN = 'todoist'
 
 WEB_HOST_QUEUE = 'web_host_queue'
 WORKLOG_QUEUE = 'worklog_queue'
-
-
-DISCORD_SEND_MESSAGE = 'send_message'
-
-
-LOGGER_MESSAGE_LEVEL = 'Level'
-LOGGER_MESSAGE_TAG = 'Tag'
-LOGGER_MESSAGE_APPLICATION = 'Application'
-LOGGER_MESSAGE_DATETIME = 'Datetime'
-LOGGER_MESSAGE_MESSAGE = 'Message'
-
-PROMISE_ID_PROPERTY = 'promise_id'
+DOCKER_QUEUE = 'docker_queue'
+SYNC_APPLICATION_QUEUE = 'sync_application_queue'

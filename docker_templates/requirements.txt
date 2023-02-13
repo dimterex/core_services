@@ -6,3 +6,5 @@ exchangelib
 jira
 websocket_server
 aiohttp
+docker
+aio-pika

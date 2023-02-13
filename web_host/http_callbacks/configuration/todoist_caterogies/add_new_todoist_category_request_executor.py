@@ -18,7 +18,6 @@ class AddNewTodoistCategoryRequestExecutor(BaseExecutor):
     async def execute(self, request: Request) -> Awaitable[StreamResponse]:
         response = self.rpcPublisher.call(CONFIGURATION_QUEUE, AddNewTodoistCategoryRequest())
 
-        result = SetBaseResponse(response.status)
-        result.exception = response.message
+        result = SetBaseResponse(response.status, response.message)
 
         return BaseExecutor.generate_response(result)

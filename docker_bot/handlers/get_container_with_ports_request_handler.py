@@ -1,30 +1,30 @@
-from datetime import datetime
+import docker
 
-from modules.core.helpers.helper import convert_rawdate_with_timezone_to_datetime
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.outlook.get_events_by_date_request import GET_CALENDAR_BY_DATE_REQUEST, \
-    GET_CALENDAR_DATE_PROPERTY
+from docker_bot.models.container_model import ContainerModel
+from modules.core.rabbitmq.messages.docker_bot.get_container_with_ports_request import \
+    GET_CONTAINERS_WITH_PORTS_REQUEST_MESSAGE_TYPE
 from modules.core.rabbitmq.messages.status_response import StatusResponse
 from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
-from outlook.models.outlook_meeting import Outlook_Meeting
-from outlook.outlook_connection import Outlook_Connection
 
 
-class GetEventsByDateHandler(RpcBaseHandler):
-    def __init__(self, outlook: Outlook_Connection, logger_service: Logger_Service):
-        super().__init__(GET_CALENDAR_BY_DATE_REQUEST)
-        self.logger_service = logger_service
-        self.outlook = outlook
+class GetContainerWithPortsRequestHandler(RpcBaseHandler):
+    def __init__(self):
+        super().__init__(GET_CONTAINERS_WITH_PORTS_REQUEST_MESSAGE_TYPE)
         self.TAG = self.__class__.__name__
 
     def execute(self, payload) -> StatusResponse:
-        self.logger_service.debug(self.TAG, 'Starting modify')
-        start_time: datetime = convert_rawdate_with_timezone_to_datetime(payload[GET_CALENDAR_DATE_PROPERTY])
-        meetings: list[Outlook_Meeting] = self.outlook.get_meeting(start_time)
+        client = docker.from_env()
+        containers: list[ContainerModel] = []
+        for c in client.containers.list(all=True):
+            ports: list[int] = []
+            for portParams in c.ports:
+                raw_ports = c.ports[portParams]
+                if raw_ports is None:
+                    continue
+                for raw_port in raw_ports:
+                    port = raw_port["HostPort"]
+                    if int(port) not in ports:
+                        ports.append(int(port))
 
-        worklogs = []
-        for calendar_item in meetings:
-            worklogs.append(calendar_item.to_json())
-        self.logger_service.debug(self.TAG, 'Ending modify')
-        response = StatusResponse(worklogs)
-        return response
+            containers.append(ContainerModel(c.id, c.name, ports).serialize())
+        return StatusResponse(containers)

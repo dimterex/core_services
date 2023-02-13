@@ -1,13 +1,11 @@
 from datetime import datetime
 
-from modules.core.helpers.helper import SECONDS_IN_HOUR, convert_rawdate_with_timezone_to_datetime
-from modules.core.log_service.log_service import DEBUG_LOG_LEVEL, Logger_Service
+from modules.core.helpers.helper import convert_rawdate_with_timezone_to_datetime
+from modules.core.log_service.log_service import Logger_Service
 from modules.core.rabbitmq.messages.outlook.get_events_by_date_request import GET_CALENDAR_BY_DATE_REQUEST, \
     GET_CALENDAR_DATE_PROPERTY
 from modules.core.rabbitmq.messages.status_response import StatusResponse
-
 from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
-from modules.models.configuration import Configuration
 from outlook.models.outlook_meeting import Outlook_Meeting
 from outlook.outlook_connection import Outlook_Connection
 
@@ -26,7 +24,7 @@ class GetEventsByDateHandler(RpcBaseHandler):
 
         worklogs = []
         for calendar_item in meetings:
-            worklogs.append(calendar_item.to_json())
+            worklogs.append(calendar_item.serialize())
         self.logger_service.debug(self.TAG, 'Ending modify')
         response = StatusResponse(worklogs)
         return response

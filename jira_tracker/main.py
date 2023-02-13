@@ -3,9 +3,10 @@ import time
 import warnings
 
 from jira_tracker.handlers.create_subtask_request_handler import CreateSubtaskRequestHandler
-from jira_tracker.handlers.get_worklogs_request_handler import GetWorklogsRequestHandler
+from jira_tracker.handlers.get_statistics_request_handler import GetStatisticsRequestHandler
 from jira_tracker.handlers.write_worklog_request_handler import WriteWorklogRequestHandler
 from jira_tracker.jira_connection import Jira_Connection
+from jira_tracker.models.history_service import History_Service
 from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
 from modules.core.rabbitmq.messages.configuration.credentials.get_credentials_request import GetCredentialsRequest
 from modules.core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
@@ -37,9 +38,10 @@ def main():
 
     jira_connection = Jira_Connection(credentials, str(get_url_response.message))
 
+    historyService = History_Service(credentials, jira_connection, logger_service)
     api_controller = RpcApiController(logger_service)
-    api_controller.subscribe(WriteWorklogRequestHandler(jira_connection, logger_service))
-    api_controller.subscribe(GetWorklogsRequestHandler(credentials, jira_connection, logger_service))
+    api_controller.subscribe(WriteWorklogRequestHandler(jira_connection, historyService, logger_service))
+    api_controller.subscribe(GetStatisticsRequestHandler(historyService, logger_service))
     api_controller.subscribe(CreateSubtaskRequestHandler(credentials, jira_connection, logger_service))
     rcp = RpcConsumer(ampq_url, JIRA_QUEUE, api_controller)
     rcp.start()

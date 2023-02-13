@@ -1,12 +1,12 @@
 from modules.core.rabbitmq.messages.base_request import BaseMessage
 
-ADD_NEW_MEETING_CATEGORY_REQUEST_MESSAGE_TYPE = 'add_new_meeting_category_request'
+ADD_NEW_PERIODICAL_TASK_REQUEST_MESSAGE_TYPE = 'add_new_periodical_task_request'
 
 
-class AddNewMeetingCategoryRequest(BaseMessage):
+class AddNewPeriodicalTaskRequest(BaseMessage):
 
     def __init__(self):
-        super().__init__(ADD_NEW_MEETING_CATEGORY_REQUEST_MESSAGE_TYPE)
+        super().__init__(ADD_NEW_PERIODICAL_TASK_REQUEST_MESSAGE_TYPE)
 
     def serialize(self):
         return self.to_json(None)

@@ -60,7 +60,7 @@ class Write_WorkLok_Action:
 
         worklogs = []
         for worklog in workLogService.worklogs:
-            worklogs.append(worklog.to_json())
+            worklogs.append(worklog.serialize())
         request_write_jira = WriteWorklogsRequest(worklogs)
         response_write_jira = self.rpc_publisher.call(JIRA_QUEUE, request_write_jira)
 
@@ -135,7 +135,7 @@ class Write_WorkLok_Action:
                     if category is None:
                         category = find_in_categories_by_name('')
 
-                if category.tracker_id is None or category.tracker_id is '':
+                if category.tracker_id is None or category.tracker_id == '':
                     continue
 
                 worklogs_service.add_worklog(calendar_item[GET_CALENDAR_BY_DATE_RESPONSE_EVENT_NAME_PROPERTY],
@@ -183,9 +183,9 @@ class Write_WorkLok_Action:
 
         tracker_id = create_task_response.message
         issue['tracker_id'] = tracker_id
-        update_label_request = UpdateLabelRequest(tracker_id, issue_id)
+        update_label_request = UpdateLabelRequest(issue_id, tracker_id)
         update_label_response = self.rpc_publisher.call(TODOIST_QUEUE, update_label_request)
-        self.logger_service.debug(self.TAG, str(update_label_response.to_json()))
+        self.logger_service.debug(self.TAG, str(update_label_response.serialize()))
 
     def write_sync(self, start_time: datetime.datetime, worklogs_service: Worklog_Service):
         Worklog_By_Periodical(start_time, self.rpc_publisher, worklogs_service, self.logger_service).modify()

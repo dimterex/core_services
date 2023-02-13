@@ -12,12 +12,17 @@ IGNORE_FOLDERS = ['.git', '.idea', 'docker', '__pycache__']
 
 if __name__ == '__main__':
     print("start")
+
     for dp, dn, filenames in os.walk(SOURCE_FOLDER):
         success = True
+
         for ignore in IGNORE_FOLDERS:
             if ignore in dp:
                 success = False
         if not success:
+
+            # if ".git" not in dp:
+            #     print(dp, dn)
             continue
 
         for f in filenames:

@@ -1,19 +1,19 @@
-from configuration.database.meeting_categories_table import MeetingCategoriesTable
-from modules.core.rabbitmq.messages.configuration.meeting_categories.remove_meeting_categories_request import \
-    REMOVE_MEETING_CATEGORIES_REQUEST_MESSAGE_TYPE, RemoveMeetingCategoriesRequest
+from configuration.database.todoist_categories_table import TodoistCategoriesTable
+from modules.core.rabbitmq.messages.configuration.todoits_categories.remove_todoist_categories_request import \
+    REMOVE_TODOIST_CATEGORIES_REQUEST_MESSAGE_TYPE, RemoveTodoistCategoriesRequest
 from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
 
 from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
-class RemoveMeetingCategoriesRequestHandler(RpcBaseHandler):
-    def __init__(self, storage: MeetingCategoriesTable):
-        super().__init__(REMOVE_MEETING_CATEGORIES_REQUEST_MESSAGE_TYPE)
+class RemoveTodoistCategoriesRequestHandler(RpcBaseHandler):
+    def __init__(self, storage: TodoistCategoriesTable):
+        super().__init__(REMOVE_TODOIST_CATEGORIES_REQUEST_MESSAGE_TYPE)
         self.storage = storage
 
     def execute(self, payload) -> StatusResponse:
         try:
-            request = RemoveMeetingCategoriesRequest.deserialize(payload)
+            request = RemoveTodoistCategoriesRequest.deserialize(payload)
             self.storage.remove(request.ids)
             return StatusResponse("Done")
         except Exception as e:

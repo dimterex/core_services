@@ -1,7 +1,7 @@
 class BaseResponse:
-    def __init__(self, status: str, exception: str = None):
-        self.exception = exception
+    def __init__(self, status: str, message: str = None):
+        self.message = message
         self.status = status
 
-    def toJson(self) -> dict:
+    def serialize(self) -> dict:
         raise Exception('Not implemented')
