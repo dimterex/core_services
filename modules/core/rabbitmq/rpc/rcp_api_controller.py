@@ -36,7 +36,7 @@ class RpcApiController:
             return self.send_response(response)
 
     def send_response(self, response: StatusResponse) -> str:
-        return json.dumps(response.to_json())
+        return json.dumps(response.serialize())
 
     def generate_exception_response(self, message: str) -> StatusResponse:
         return StatusResponse(message, ERROR_STATUS_CODE)

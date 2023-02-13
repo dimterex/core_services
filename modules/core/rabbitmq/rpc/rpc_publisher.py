@@ -1,11 +1,10 @@
-import codecs
 import json
 
 import pika
 import uuid
 
 from modules.core.rabbitmq.messages.base_request import BaseMessage
-from modules.core.rabbitmq.messages.status_response import StatusResponse
+from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
 
 
 class RpcPublisher(object):
@@ -37,13 +36,15 @@ class RpcPublisher(object):
                 correlation_id=corr_id,
             ),
             body=json.dumps(request.serialize()))
-        connection.process_data_events(time_limit=None)
+        connection.process_data_events(time_limit=20)
         connection.close()
-        response = self.responses[corr_id]
-        self.responses.pop(corr_id)
-        js = json.loads(response)
-        if isinstance(js, str):
-            return StatusResponse.from_json(json.loads(js))
-        return StatusResponse.from_json(js)
 
+        if corr_id in self.responses:
+            response = self.responses[corr_id]
+            self.responses.pop(corr_id)
+            js = json.loads(response)
+            if isinstance(js, str):
+                return StatusResponse.deserialize(json.loads(js))
+            return StatusResponse.deserialize(js)
 
+        return StatusResponse('Not exist response', ERROR_STATUS_CODE)
