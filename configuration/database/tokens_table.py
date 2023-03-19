@@ -31,7 +31,7 @@ class TokensTable(BaseTable):
             TOKENS_NAME_COLUMN_NAME: key
         })
         if result is None:
-            raise Exception(f'Can not find url for {key}')
+            raise Exception(f'Can not find token for {key}')
 
         return result[2]
 

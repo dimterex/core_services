@@ -23,7 +23,7 @@ class UrlsTable(BaseTable):
         data = self.get_data()
         models = []
         for row in data:
-            models.append(UrlModel(row[0], row[1], row[1]))
+            models.append(UrlModel(row[0], row[1], row[2]))
         return models
 
     def get_url(self, url_type: str):

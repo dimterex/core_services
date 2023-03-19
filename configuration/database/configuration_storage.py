@@ -5,6 +5,7 @@ from configuration.database.meeting_categories_table import MeetingCategoriesTab
 from configuration.database.periodical_tasks_table import PeriodicalTasksTable
 from configuration.database.todoist_categories_table import TodoistCategoriesTable
 from configuration.database.tokens_table import TokensTable
+from configuration.database.tracks_table import TracksTable
 from configuration.database.urls_table import UrlsTable
 from modules.core.log_service.log_service import Logger_Service
 
@@ -22,6 +23,7 @@ class ConfigurationStorage(BaseStorage):
         self.todoist_categories_table = TodoistCategoriesTable(logger, path)
         self.tokens_table = TokensTable(logger, path)
         self.periodical_tasks_table = PeriodicalTasksTable(logger, path)
+        self.tracks_table = TracksTable(logger, path)
         super().__init__(logger, path)
 
     def get_create_table_request(self) -> list[str]:
@@ -32,4 +34,5 @@ class ConfigurationStorage(BaseStorage):
             self.todoist_categories_table.get_initialize_table(),
             self.tokens_table.get_initialize_table(),
             self.periodical_tasks_table.get_initialize_table(),
+            self.tracks_table.get_initialize_table(),
         ]

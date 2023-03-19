@@ -1,65 +1,47 @@
-# Transferring Outlook calendar to bug trackers
+Arch
 
+```plantuml
+@startuml
+!theme vibrant
 
-###Supported bug trackers:
-1. Redmine
-2. Jira
+title Components diagram
 
-### Functions 
+left to right direction
 
-1. Transferring Outlook calendar 
-2. Fill periodical issue (like code review, etc.)
-
-### How use it
-* Create categories for events in calendar
-* Create ignorable category (assign this category for event, and this event can not transferring)
-* Assign a category for events (only 1 category for 1 event)
-* Append each category to settings into "categories" (see example of settings)
-* Append some periodical task to settings into "periodical" (see example of settings)
-* Append ignorable category into "ignore" (see example of settings)
-
-### Settings example
-
-```
-{
-    "login": "testLogin",
-    "password": "testPassword",
-    "email": "test@mail.ru",
-    "domain": "DOMAIN",
-
-    "outlook_url": "https://mail.***.ru",
-    "jira_url": "https://jira.local",
-    "redmine_url": "http://redmine.local",
-
-    "categories": [
-        {
-            "name": "Not project",
-            "jira_id": "SP-60273",
-            "redmine_id": "46822"
-        },{
-            "name": "Interview",
-            "jira_id": "SP-60273",
-            "redmine_id": "53911"
-        }
-    ],
-    "periodical": [
-        {
-            "name": "Code Review",
-            "jira_id": "SP-60276",
-            "redmine_id": "58279"
-        },{
-            "name": "Consultation",
-            "jira_id": "SP-60272",
-            "redmine_id": "58275"
-        }
-    ],
-
-    "ignore": "Ignorable"
+package kotlin as "[[https://github.com/dimterex/FileSyncAndroidClient{Kotlin} Kotlin]]"  {
+    component "Sync application" as sync_f
 }
+
+package csproj as "[[https://github.com/dimterex/FileSyncService{C#} C#]]" {
+    component "Sync service" as sync_b
+    component "Telegram bot service" as telegram
+    component "Vpn connection service" as vpn
+}
+
+package python as "[[https://github.com/dimterex/outlook2tracker{Python} Python]]" {
+    component "Configuration service" as config
+    component "Discord bot service" as discord
+    component "Docker service" as docker
+    component "Jira service" as jira
+    component "Outlook service" as outlook
+    component "Todoist service" as todoist
+    component "Web host service" as web_host
+    component "Worklog KPI service" as worklog
+    component "Yandex service" as yandex
+}
+
+sync_b --* sync_f: REST
+
+sync_b *-- config: mq
+vpn *-- config: mq
+discord *-- config: mq
+docker *-- config: mq
+jira *-- config: mq
+outlook *-- config: mq
+todoist *-- config: mq
+web_host *-- config: mq
+worklog *-- config: mq
+yandex *-- config: mq
+
+@enduml
 ```
-
-
-### Dependency 
-1. https://pypi.org/project/python-redmine/
-2. https://pypi.org/project/jira/
-3. https://pypi.org/project/exchangelib/

@@ -26,6 +26,9 @@ from configuration.handlers.tokens.get_tokens_request_handler import GetTokensRe
 from configuration.handlers.tokens.remove_tokens_request_handler import RemoveTokensRequestHandler
 from configuration.handlers.tokens.set_token_request_handler import SetTokenRequestHandler
 from configuration.handlers.tokens.set_tokens_request_handler import SetTokensRequestHandler
+from configuration.handlers.tracks.add_new_track_request_handler import AddNewTrackRequestHandler
+from configuration.handlers.tracks.get_track_request_handler import GetTrackRequestHandler
+from configuration.handlers.tracks.get_tracks_request_handler import GetTracksRequestHandler
 from configuration.handlers.urls.add_new_url_request_handler import AddNewUrlRequestHandler
 from configuration.handlers.urls.get_url_request_handler import GetUrlRequestHandler
 from configuration.handlers.credentials.set_credentials_request_handler import SetCredentialsRequestHandler
@@ -95,6 +98,11 @@ def main():
     api_controller.subscribe(SetPeriodicalTasksRequestHandler(storage.periodical_tasks_table))
     api_controller.subscribe(AddNewPeriodicalTaskRequestHandler(storage.periodical_tasks_table))
     api_controller.subscribe(RemovePeriodicalTasksRequestHandler(storage.periodical_tasks_table))
+
+    # tracks
+    api_controller.subscribe(AddNewTrackRequestHandler(storage.tracks_table))
+    api_controller.subscribe(GetTrackRequestHandler(storage.tracks_table))
+    api_controller.subscribe(GetTracksRequestHandler(storage.tracks_table))
 
     rcp = RpcConsumer(ampq_url, CONFIGURATION_QUEUE, api_controller)
     rcp.start()

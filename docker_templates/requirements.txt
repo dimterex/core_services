@@ -8,3 +8,5 @@ websocket_server
 aiohttp
 docker
 aio-pika
+yandex-music
+mutagen

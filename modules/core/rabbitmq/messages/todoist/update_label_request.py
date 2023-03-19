@@ -1,8 +1,4 @@
-import json
-
 from modules.core.rabbitmq.messages.base_request import BaseMessage
-from modules.core.rabbitmq.messages.identificators import MESSAGE_TYPE, \
-    MESSAGE_PAYLOAD
 
 UPDATE_LABEL_MESSAGE_TYPE = 'update_label_request'
 UPDATE_LABEL_TODOIST_TASK_ID = 'id'

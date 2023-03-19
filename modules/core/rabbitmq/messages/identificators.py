@@ -5,6 +5,7 @@ OUTLOOK_QUEUE = 'outlook_queue'
 DISCORD_QUEUE = 'discord_queue'
 JIRA_QUEUE = 'jira_queue'
 TODOIST_QUEUE = 'todoist_queue'
+TRACKS_QUEUE = 'tracks_queue'
 # ---- Configuration ----
 CONFIGURATION_QUEUE = 'configuration_queue'
 JIRA_URL_TYPE = 'jira_url'
@@ -12,6 +13,7 @@ OUTLOOK_URL_TYPE = 'outlook_url'
 
 DISCORD_TOKEN = 'discord'
 TODOIST_TOKEN = 'todoist'
+YANDEX_TOKEN = 'yandex'
 # -------------------------
 
 WEB_HOST_QUEUE = 'web_host_queue'

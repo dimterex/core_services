@@ -2,20 +2,23 @@ import os
 import time
 import warnings
 
-from todoist_api_python.api import TodoistAPI
-
 from modules.core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
-from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, TODOIST_QUEUE, TODOIST_TOKEN
+from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, TRACKS_QUEUE, YANDEX_TOKEN
 from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
+from modules.core.rabbitmq.messages.tracks.get_track_metadata_request import GetTrackMetadataRequest
 from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
 from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
 
 from modules.core.log_service.log_service import Logger_Service
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
-from todoist.handlers.get_completed_tasks_request_handler import GetCompletedTasksRequestHandler
-from todoist.handlers.update_label_request_handler import UpdateLabelRequestHandler
+from yandex.handlers.comparing_track_info_handler import ComparingTrackInfoHandler
+from yandex.handlers.download_likes_tracks_handler import DownloadLikesTracksHandler
+from yandex.handlers.get_track_metadata_request_handler import GetTrackMetadataRequestHandler
+from yandex.services.tags_service import TagsService
+from yandex.services.yandex_service import YandexMusicService
 
 RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
+DOWNLOAD_DIRECTORY_PATH = '/downloads'
 
 
 def main():
@@ -23,18 +26,21 @@ def main():
     ampq_url = os.environ[RABBIT_CONNECTION_STRING]
     rpc_publisher = RpcPublisher(ampq_url)
 
-    token_response = rpc_publisher.call(CONFIGURATION_QUEUE, GetTokenRequest(TODOIST_TOKEN))
+    token_response = rpc_publisher.call(CONFIGURATION_QUEUE, GetTokenRequest(YANDEX_TOKEN))
 
     if token_response.status == ERROR_STATUS_CODE:
         raise Exception(token_response.message)
+    yandexService = YandexMusicService(str(token_response.message), DOWNLOAD_DIRECTORY_PATH, logger_service)
+    trackService = TagsService(logger_service)
 
-    todoistApi = TodoistAPI(str(token_response.message))
-
+    download_handler = DownloadLikesTracksHandler(yandexService, trackService, logger_service, rpc_publisher)
+    download_handler.start()
     api_controller = RpcApiController(logger_service)
-    api_controller.subscribe(GetCompletedTasksRequestHandler(todoistApi, logger_service))
-    api_controller.subscribe(UpdateLabelRequestHandler(todoistApi, logger_service))
-    rcp = RpcConsumer(ampq_url, TODOIST_QUEUE, api_controller)
+    rcp = RpcConsumer(ampq_url, TRACKS_QUEUE, api_controller)
+    api_controller.subscribe(GetTrackMetadataRequestHandler(logger_service, yandexService))
     rcp.start()
+    # comparing_handler = ComparingTrackInfoHandler(DOWNLOAD_DIRECTORY_PATH, yandexService, trackService, logger_service, rpc_publisher)
+    # comparing_handler.start('/music')
 
 
 if __name__ == '__main__':
@@ -42,8 +48,4 @@ if __name__ == '__main__':
     print('Starting')
     main()
     print('Started')
-    try:
-        while True:
-            time.sleep(1)
-    finally:
-        pass
+
