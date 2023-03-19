@@ -5,10 +5,10 @@ from typing import Awaitable
 
 from modules.core.http_server.base_executor import BaseExecutor
 from modules.core.rabbitmq.messages.identificators import SYNC_APPLICATION_QUEUE
-from modules.core.rabbitmq.messages.status_response import StatusResponse
+from modules.core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE, StatusResponse
 from modules.core.rabbitmq.messages.sync_application.get_history_request import GetSyncHistoryRequest
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
-from web_host.messages.configuration.set_base_reponse import SetBaseResponse
+from web_host.messages.sync.sync_history_response import SyncHistoryResponse
 
 
 class GetSyncHistoryRequestExecutor(BaseExecutor):
@@ -17,5 +17,10 @@ class GetSyncHistoryRequestExecutor(BaseExecutor):
 
     async def execute(self, request: Request) -> Awaitable[StreamResponse]:
         response: StatusResponse = self.rpcPublisher.call(SYNC_APPLICATION_QUEUE, GetSyncHistoryRequest())
-        result = SetBaseResponse(response.status, response.message)
+        result = SyncHistoryResponse(response.status, response.message)
+        if result.status == SUCCESS_STATUS_CODE:
+            result.items = response.message
+        else:
+            result.exception = response.message
+
         return BaseExecutor.generate_response(result)

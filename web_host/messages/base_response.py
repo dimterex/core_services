@@ -1,6 +1,6 @@
 class BaseResponse:
-    def __init__(self, status: str, message: str = None):
-        self.message = message
+    def __init__(self, status: str, exception: str = None):
+        self.exception = exception
         self.status = status
 
     def serialize(self) -> dict:

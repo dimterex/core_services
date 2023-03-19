@@ -6,8 +6,6 @@ class CredentialsResponse(BaseResponse):
     def __init__(self, status: str, credentials: CredentialModel= None, exception: str = None):
         super().__init__(status, exception)
         self.credentials = credentials
-        self.exception = exception
-        self.status = status
 
     def serialize(self) -> dict:
         return {

@@ -5,8 +5,6 @@ class TokensResponse(BaseResponse):
     def __init__(self, status: str, tokens: list[dict] = None, exception: str = None):
         super().__init__(status, exception)
         self.tokens = tokens
-        self.exception = exception
-        self.status = status
 
     def serialize(self) -> dict:
         return {

@@ -5,8 +5,6 @@ class DayEventsResponse(BaseResponse):
     def __init__(self, status: str, messages: list[str] = None, exception: str = None):
         super().__init__(status, exception)
         self.messages = messages
-        self.exception = exception
-        self.status = status
 
     def serialize(self) -> dict:
         return {
