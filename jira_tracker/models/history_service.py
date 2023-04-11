@@ -31,7 +31,9 @@ class History_Service:
     def get_statistic(self, year: int, month: int) -> list[WorklogDay]:
         if year not in self.statistics:
             return []
-        return self.statistics[year][month]
+        if month in self.statistics[year]:
+            return self.statistics[year][month]
+        return []
 
     def update_date(self, date: datetime, duration: int):
         year = date.year

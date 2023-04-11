@@ -71,6 +71,8 @@ class YandexMusicService:
 
     def get_songs(self) -> list[TrackDto]:
         client = Client(self.token).init()
+        if not client.me.plus.has_plus:
+            return []
         tracks = client.users_likes_tracks()
         response: list[TrackDto] = []
         for t in tracks:

@@ -8,5 +8,5 @@ class SetBaseResponse(BaseResponse):
     def serialize(self) -> dict:
         return {
             'status': self.status,
-            'message': self.message,
+            'message': self.exception,
         }
