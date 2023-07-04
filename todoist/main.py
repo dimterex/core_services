@@ -12,6 +12,7 @@ from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
 
 from modules.core.log_service.log_service import Logger_Service
 from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from todoist.handlers.add_task_request_handler import AddTaskRequestHandler
 from todoist.handlers.get_completed_tasks_request_handler import GetCompletedTasksRequestHandler
 from todoist.handlers.update_label_request_handler import UpdateLabelRequestHandler
 
@@ -33,6 +34,7 @@ def main():
     api_controller = RpcApiController(logger_service)
     api_controller.subscribe(GetCompletedTasksRequestHandler(todoistApi, logger_service))
     api_controller.subscribe(UpdateLabelRequestHandler(todoistApi, logger_service))
+    api_controller.subscribe(AddTaskRequestHandler(todoistApi, logger_service))
     rcp = RpcConsumer(ampq_url, TODOIST_QUEUE, api_controller)
     rcp.start()
 

@@ -27,11 +27,13 @@ class WriteWorklogRequestHandler(RpcBaseHandler):
                 date = convert_rawdate_with_timezone_to_datetime(issue['date'])
                 tracker_id = issue['tracker_id']
                 duration = issue['duration']
+                self.logger_service.debug(self.TAG, f'Try to save worklog {name}, {tracker_id}, {duration}')
                 jira.add_worklog(tracker_id, timeSpent=f'{duration}', started=date, comment=name)
                 self.historyService.update_date(date, duration)
+                self.logger_service.debug(self.TAG, f'Saved worklog {name}, {tracker_id}, {duration}')
 
             jira.close()
-            response = StatusResponse(None)
+            response = StatusResponse('Wrote')
             self.logger_service.debug(self.TAG, 'Disconnected to jira for write worklogs...')
         except Exception as e:
             response = StatusResponse(f'{e}', ERROR_STATUS_CODE)

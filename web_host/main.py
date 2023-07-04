@@ -9,6 +9,7 @@ from web_host.http_callbacks.configuration.get_credentials_request_executor impo
 from web_host.http_callbacks.configuration.periodical_tasks.add_new_periodical_task_request_executor import AddNewPeriodicalTaskRequestExecutor
 from web_host.http_callbacks.configuration.periodical_tasks.get_periodical_tasks_request_executor import GetPeriodicalTasksRequestExecutor
 from web_host.http_callbacks.configuration.periodical_tasks.remove_periodical_tasks_request_executor import RemovePeriodicalTasksRequestExecutor
+from web_host.http_callbacks.configuration.todoist_caterogies.add_new_task_request_executor import AddNewTaskRequestExecutor
 from web_host.http_callbacks.configuration.todoist_caterogies.add_new_todoist_category_request_executor import AddNewTodoistCategoryRequestExecutor
 from web_host.http_callbacks.configuration.todoist_caterogies.get_todoist_category_request_executor import GetTodoistCategoryRequestExecutor
 from web_host.http_callbacks.configuration.tokens.add_new_token_request_executor import AddNewTokenRequestExecutor
@@ -75,6 +76,7 @@ def main():
         HttpRoute(HTTPMethod.PUT, f'{API_PREFIX}/configuration/set_task_categories', SetTodoistCategoryRequestExecutor(rpc_publisher)),
         HttpRoute(HTTPMethod.PUT, f'{API_PREFIX}/configuration/add_new_task_category', AddNewTodoistCategoryRequestExecutor(rpc_publisher)),
         HttpRoute(HTTPMethod.PUT, f'{API_PREFIX}/configuration/remove_task_categories', RemoveTodoistCategoriesRequestExecutor(rpc_publisher)),
+        HttpRoute(HTTPMethod.GET, f'{API_PREFIX}/configuration/add_new_task', AddNewTaskRequestExecutor(rpc_publisher)),
 
         # tokens
         HttpRoute(HTTPMethod.GET, f'{API_PREFIX}/configuration/get_tokens', GetTokensRequestExecutor(rpc_publisher)),

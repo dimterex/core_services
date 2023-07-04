@@ -28,9 +28,7 @@ class UpdateLabelRequestHandler(RpcBaseHandler):
                 return StatusResponse(status_message)
 
         label = self.todoistAPI.add_label(task_label)
-        label_id = label.id
-
-        self.todoistAPI.update_task(int(task_id), label_ids=[label_id])
+        self.todoistAPI.update_task(int(task_id), labels=[task_label])
 
         status_message = f'Label {task_label} added to {task_id}'
         self.logger_service.debug(self.TAG, status_message)
