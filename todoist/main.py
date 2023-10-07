@@ -7,6 +7,7 @@ from todoist_api_python.api import TodoistAPI
 from modules.core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
 from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, TODOIST_QUEUE, TODOIST_TOKEN
 from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
+from modules.core.rabbitmq.messages.todoist.update_label_request import UpdateLabelRequest
 from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
 from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
 
@@ -34,6 +35,12 @@ def main():
     api_controller = RpcApiController(logger_service)
     api_controller.subscribe(GetCompletedTasksRequestHandler(todoistApi, logger_service))
     api_controller.subscribe(UpdateLabelRequestHandler(todoistApi, logger_service))
+
+    # UpdateLabelRequestHandler(todoistApi, logger_service).execute({
+    #     'id': '7025287234',
+    #     'label': 'RAD-1360'
+    # })
+
     api_controller.subscribe(AddTaskRequestHandler(todoistApi, logger_service))
     rcp = RpcConsumer(ampq_url, TODOIST_QUEUE, api_controller)
     rcp.start()

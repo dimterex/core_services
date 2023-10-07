@@ -59,18 +59,17 @@ class GetCompletedTasksRequestHandler(RpcBaseHandler):
         for task_id in Todoist_Tasks(tasks).items:
             taskInfo: Task = self.todoistAPI.get_task(task_id)
             self.logger_service.trace(self.TAG, str(taskInfo))
-            if taskInfo.section_id == 0 or taskInfo.section_id is None:
-                sectionInfo = self.todoistAPI.get_section(83787255)
-            else:
-                sectionInfo = self.todoistAPI.get_section(taskInfo.section_id)
+            category = None
+            if taskInfo.section_id is not None and taskInfo.section_id > 0:
+                category = self.todoistAPI.get_section(taskInfo.section_id).name
             if taskInfo.due is None:
                 continue
             date = dateutil.parser.parse(taskInfo.due.date)
 
             if date.day == start_time.day and date.month == start_time.month and date.year == start_time.year:
                 if len(taskInfo.labels) > 0:
-                    correct_tasks.append(Task_Entry(taskInfo.id, taskInfo.content, date, sectionInfo.name, taskInfo.labels[0]))
+                    correct_tasks.append(Task_Entry(taskInfo.id, taskInfo.content, date, category, taskInfo.labels[0]))
                 else:
-                    correct_tasks.append(Task_Entry(taskInfo.id, taskInfo.content, date, sectionInfo.name, None))
+                    correct_tasks.append(Task_Entry(taskInfo.id, taskInfo.content, date, category, None))
 
         return correct_tasks

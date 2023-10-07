@@ -59,12 +59,12 @@ class DownloadLikesTracksHandler(threading.Thread):
 
             if track_model_response.status == ERROR_STATUS_CODE:
                 # Change name of the final file here
-                track_name = f'{track.artists} - {track.title}'
-                track_storage_dto = self.yandexMusicService.download(track.id, track_name)
+
+                track_storage_dto = self.yandexMusicService.download(track)
 
                 self.trackService.set_metadata(track, track_storage_dto)
                 os.remove(track_storage_dto.cover_path)
-                add_track_model_response = self.rpcPublisher.call(CONFIGURATION_QUEUE, AddNewTrackRequest(track.id, track_name))
+                add_track_model_response = self.rpcPublisher.call(CONFIGURATION_QUEUE, AddNewTrackRequest(track.id, track_storage_dto.track_name))
                 if add_track_model_response.status == ERROR_STATUS_CODE:
                     raise Exception(add_track_model_response.message)
 

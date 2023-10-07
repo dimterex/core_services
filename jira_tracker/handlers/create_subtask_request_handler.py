@@ -22,21 +22,25 @@ class CreateSubtaskRequestHandler(RpcBaseHandler):
         jira = self.jira.connect_to_jira()
         self.logger_service.debug(self.TAG, 'Connected to jira for create subtask...')
         issue = jira.issue(root_id)
-        try:
-            result = jira.create_issue(project={'key': issue.fields.project.key},
-                                       summary=name,
-                                       issuetype={'name': 'Task'},
-                                       components=[{'name': 'TRD'}],
-                                       assignee={"name": self.credentials.login},
-                                       parent={'key': root_id})
-        except:
-            result = jira.create_issue(project={'key': issue.fields.project.key},
-                                       summary=name,
-                                       issuetype={'name': 'Task'},
-                                       components=[{'name': 'TRD Team'}],
-                                       assignee={"name": self.credentials.login},
-                                       parent={'key': root_id})
+        components = ['Architect, TRD', 'TRD', 'TRD Team']
+        created_id = None
+        for component in components:
+            created_id = self.try_create_task(jira, issue.fields.project.key, name, component, root_id)
+            if created_id is not None:
+                break
 
         jira.close()
         self.logger_service.debug(self.TAG, 'Disconnected to jira for create subtask...')
-        return StatusResponse(result.key)
+        return StatusResponse(created_id)
+
+    def try_create_task(self, jira, project, name, component, root_id):
+        try:
+            return jira.create_issue(project={'key': project},
+                                     summary=name,
+                                     issuetype={'name': 'Task'},
+                                     components=[{'name': component}],
+                                     assignee={"name": self.credentials.login},
+                                     parent={'key': root_id}).key
+        except Exception as ex:
+            self.logger_service.error(self.TAG, str(ex))
+            return None

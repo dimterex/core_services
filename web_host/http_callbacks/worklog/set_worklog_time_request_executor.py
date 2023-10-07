@@ -26,7 +26,7 @@ class SetWorklogTimeRequestExecutor(BaseExecutor):
         write_worklog_request = Write_Worklog_Request(date_time)
         response = self.rpcPublisher.call(WORKLOG_QUEUE, write_worklog_request)
 
-        result = SetWorklogResponse('ok')
+        result = SetWorklogResponse(response.status)
         if result.status == SUCCESS_STATUS_CODE:
             result.messages = response.message
         else:

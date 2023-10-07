@@ -180,6 +180,8 @@ class Write_WorkLok_Action:
         parent_issue_id = category.tracker_id
         create_task_request = CreateSubTaskRequest(name, parent_issue_id)
         create_task_response = self.rpc_publisher.call(JIRA_QUEUE, create_task_request)
+        if create_task_response.status == ERROR_STATUS_CODE:
+            raise Exception(create_task_response.message)
 
         tracker_id = create_task_response.message
         issue['tracker_id'] = tracker_id

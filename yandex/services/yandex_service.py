@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from yandex_music import Client, Search, Track
 
@@ -80,12 +81,17 @@ class YandexMusicService:
             response.append(TrackDto(track))
         return response
 
-    def download(self, track_id: str, name: str) -> TrackStorageDto:
-        self.logger_Service.debug(self.TAG, f'Start download: {name}')
+    def download(self, track: TrackDto) -> TrackStorageDto:
+        track_id = track.id
+        track_name = f'{track.track_position}. {track.artists} - {track.title}'
+        track_path = os.path.join(self.download_directory, track.artists, f'{track.year} - {track.albums}')
+        Path(track_path).mkdir(parents=True, exist_ok=True)
+
+        self.logger_Service.debug(self.TAG, f'Start download: {track_name}')
         client = Client(self.token).init()
         track = client.tracks(track_id)[0]
-        track_storage_dto = TrackStorageDto(os.path.join(self.download_directory, f'{name}.mp3'), os.path.join(self.download_directory, f'{name}.png'))
+        track_storage_dto = TrackStorageDto(track_path, track_name)
         track.download_cover(track_storage_dto.cover_path, '1000x1000')
         track.download(track_storage_dto.file_path, 'mp3', 320)
-        self.logger_Service.debug(self.TAG, f'End download: {name}')
+        self.logger_Service.debug(self.TAG, f'End download: {track_name}')
         return track_storage_dto
