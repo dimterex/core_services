@@ -1,0 +1,205 @@
+{
+  "metrics": [
+    {
+      "command": "processes",
+      "root": "$.process.[*]",
+      "tags": {
+        "name": "$.comm",
+        "pid": "$.pid"
+      },
+      "values": {
+        "cpu": "$.statistics.cpu.cur",
+        "state": "$.state",
+        "memory": "$.vm-size"
+      }
+    },
+    {
+      "command": "interface",
+      "root": "$",
+      "param": {
+        "name": "WifiMaster0"
+      },
+      "tags": {},
+      "values": {
+        "temperature": "$.temperature"
+      }
+    },
+    {
+      "command": "ip hotspot",
+      "root": "$.host[*]",
+      "tags": {
+        "hostname": "$.hostname",
+        "name": "$.name",
+        "ssid": "$.ssid",
+        "mode": "$.mode",
+        "ip": "$.ip",
+        "mac": "$.mac"
+      },
+      "values": {
+        "rxbytes": "$.rxbytes",
+        "txbytes": "$.txbytes",
+        "txrate": "$.txrate",
+        "uptime": "$.uptime",
+        "signal": "$.rssi",
+        "speed": "$.speed",
+        "active": "$.active"
+      }
+    },
+    {
+      "command": "interface",
+      "root": "$.*",
+      "tags": {
+        "id": "$.id",
+        "type": "$.type",
+        "description": "$.description",
+        "interface-name": "$.interface-name",
+        "address": "$.address"
+      },
+      "values": {
+        "mtu": "$.mtu",
+        "uptime": "$.uptime",
+        "tx-queue": "$.tx-queue",
+        "state": "$.state"
+      }
+    },
+    {
+      "command": "system",
+      "root": "$",
+      "tags": {
+        "hostname": "$.hostname"
+      },
+      "values": {
+        "cpuload": "$.cpuload",
+        "memtotal": "$.memtotal",
+        "memfree": "$.memfree",
+        "memcache": "$.memcache",
+        "swaptotal": "$.swaptotal",
+        "swapfree": "$.swapfree",
+        "uptime": "$.uptime",
+        "membuffers": "$.membuffers"
+      }
+    },
+    {
+      "command": "internet status",
+      "root": "$",
+      "tags": {},
+      "values": {
+        "internet": "$.internet",
+        "gateway-accessible": "$.gateway-accessible",
+        "dns-accessible": "$.dns-accessible",
+        "host-accessible": "$.host-accessible",
+        "captive-accessible": "$.captive-accessible"
+      }
+    },
+    {
+      "command": "media",
+      "root": "$.*.partition.[*]",
+      "tags": {
+        "label": "$.label",
+        "uuid": "$.uuid"
+      },
+      "values": {
+        "total": "$.total",
+        "free": "$.free",
+        "state": "$.state"
+      }
+    },
+    {
+      "command": "interface stat",
+      "root": "$",
+      "param": {
+        "name": "ISP"
+      },
+      "tags": {},
+      "values": {
+        "rxbytes": "$.rxbytes",
+        "txbytes": "$.txbytes",
+        "rxspeed": "$.rxspeed",
+        "txspeed": "$.txspeed"
+      }
+    },
+    {
+      "command": "interface stat",
+      "root": "$",
+      "param": {
+        "name": "AccessPoint"
+      },
+      "tags": {},
+      "values": {
+        "rxbytes": "$.rxbytes",
+        "txbytes": "$.txbytes",
+        "rxspeed": "$.rxspeed",
+        "txspeed": "$.txspeed"
+      }
+    },
+    {
+      "command": "interface stat",
+      "root": "$",
+      "param": {
+        "name": "AccessPoint_5G"
+      },
+      "tags": {},
+      "values": {
+        "rxbytes": "$.rxbytes",
+        "txbytes": "$.txbytes",
+        "rxspeed": "$.rxspeed",
+        "txspeed": "$.txspeed"
+      }
+    },
+    {
+      "command": "interface stat",
+      "root": "$",
+      "param": {
+        "name": "GigabitEthernet0"
+      },
+      "tags": {},
+      "values": {
+        "rxbytes": "$.rxbytes",
+        "txbytes": "$.txbytes",
+        "rxspeed": "$.rxspeed",
+        "txspeed": "$.txspeed"
+      }
+    },
+    {
+      "command": "interface stat",
+      "root": "$",
+      "param": {
+        "name": "PPTP0"
+      },
+      "tags": {},
+      "values": {
+        "rxbytes": "$.rxbytes",
+        "txbytes": "$.txbytes",
+        "rxspeed": "$.rxspeed",
+        "txspeed": "$.txspeed"
+      }
+    }, {
+      "command": "ntce hosts",
+      "root": "$.host[*]",
+      "tags": {
+        "mac": "$.mac",
+        "application": "$.application.long",
+        "device": "$.host.name",
+        "hostname": "$.host.hostname"
+      },
+      "values": {
+        "active": "$.host.active",
+        "registered": "$.host.registered",
+        "rxbytes": "$.host.rxbytes",
+        "txbytes": "$.host.txbytes",
+        "txrate": "$.host.txrate",
+        "uptime": "$.host.uptime",
+        "rssi": "$.host.rssi",
+        "ssid": "$.host.ssid"
+      }
+    }, {
+      "command": "version",
+      "root": "$",
+      "tags": {
+        "release": "$.release",
+        "version": "$.title"
+      },
+      "values": { }
+    }
+  ]
+}
