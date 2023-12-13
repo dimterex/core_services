@@ -12,17 +12,15 @@ class KeeneticClient:
         self._admin_endpoint = admin_endpoint
         self._login = login
         self._password = password
+        self._session = None
 
-    def __enter__(self):
-        self._session = Session()
-        self._auth()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def logout(self):
         if self._session:
             self._session.close()
+        self._session = None
 
-    def _auth(self) -> bool:
+    def login(self) -> bool:
+        self._session = Session()
         auth_endpoint = f"{self._admin_endpoint}/auth"
         check_auth_response = self._session.get(auth_endpoint)
         if check_auth_response.status_code == 401:
@@ -44,11 +42,5 @@ class KeeneticClient:
         r = self._session.get(url)
         if r.status_code == 200:
             return r.json()
-        raise KeeneticApiException(r.status_code, r.text)
+        raise Exception(r)
 
-
-class KeeneticApiException(Exception):
-
-    def __init__(self, status_code: int, response_text: str):
-        self.status_code = status_code
-        self.response_text = response_text

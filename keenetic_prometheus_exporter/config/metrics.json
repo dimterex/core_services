@@ -5,11 +5,11 @@
       "root": "$.process.[*]",
       "tags": {
         "name": "$.comm",
-        "pid": "$.pid"
+        "pid": "$.pid",
+        "state": "$.state"
       },
       "values": {
         "cpu": "$.statistics.cpu.cur",
-        "state": "$.state",
         "memory": "$.vm-size"
       }
     },
@@ -52,7 +52,7 @@
         "id": "$.id",
         "type": "$.type",
         "description": "$.description",
-        "interface-name": "$.interface-name",
+        "name": "$.interface-name",
         "address": "$.address"
       },
       "values": {
@@ -65,9 +65,7 @@
     {
       "command": "system",
       "root": "$",
-      "tags": {
-        "hostname": "$.hostname"
-      },
+      "tags": { },
       "values": {
         "cpuload": "$.cpuload",
         "memtotal": "$.memtotal",
@@ -85,10 +83,10 @@
       "tags": {},
       "values": {
         "internet": "$.internet",
-        "gateway-accessible": "$.gateway-accessible",
-        "dns-accessible": "$.dns-accessible",
-        "host-accessible": "$.host-accessible",
-        "captive-accessible": "$.captive-accessible"
+        "gateway_accessible": "$.gateway-accessible",
+        "dns_accessible": "$.dns-accessible",
+        "host_accessible": "$.host-accessible",
+        "captive_accessible": "$.captive-accessible"
       }
     },
     {
@@ -175,22 +173,26 @@
       }
     }, {
       "command": "ntce hosts",
-      "root": "$.host[*]",
+      "root": "$.host[*].application[*]",
       "tags": {
-        "mac": "$.mac",
-        "application": "$.application.long",
-        "device": "$.host.name",
-        "hostname": "$.host.hostname"
+        "mac": "`parent`.`parent`.mac",
+        "device": "`parent`.`parent`.host.name",
+        "hostname": "`parent`.`parent`.host.hostname",
+        "ssid": "`parent`.`parent`.host.ssid",
+        "application": "$.long"
       },
       "values": {
-        "active": "$.host.active",
-        "registered": "$.host.registered",
-        "rxbytes": "$.host.rxbytes",
-        "txbytes": "$.host.txbytes",
-        "txrate": "$.host.txrate",
-        "uptime": "$.host.uptime",
-        "rssi": "$.host.rssi",
-        "ssid": "$.host.ssid"
+        "active": "`parent`.`parent`.host.active",
+        "registered": "`parent`.`parent`.host.registered",
+        "rxbytes": "`parent`.`parent`.host.rxbytes",
+        "txbytes": "`parent`.`parent`.host.txbytes",
+        "application_rxbytes": "$.rxbytes",
+        "application_txbytes": "$.txbytes",
+        "txrate": "`parent`.`parent`.host.txrate",
+        "uptime": "`parent`.`parent`.host.uptime",
+        "first_seen": "`parent`.`parent`.host.first-seen",
+        "last_seen": "`parent`.`parent`.host.last-seen",
+        "rssi": "`parent`.`parent`.host.rssi"
       }
     }, {
       "command": "version",
