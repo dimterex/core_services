@@ -1,5 +1,3 @@
-import datetime
-
 from core.helpers.scheduleService import ScheduleService
 from core.log_service.log_service import Logger_Service
 from core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
@@ -33,7 +31,6 @@ class DownloadLikesTracksHandler(ScheduleService):
             raise Exception(soundcloud_user_id_response.message)
 
         tracks: list[TrackDto] = self.soundCloudService.get_songs(soundcloud_client_id_response.message, soundcloud_user_id_response.message)
-
         for track in tracks:
             track_model_response = self.rpcPublisher.call(CONFIGURATION_QUEUE, GetTrackRequest(track.id, SOUNDCLOUD_SOURCE))
 

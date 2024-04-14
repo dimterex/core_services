@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  yandex:
+    volumes:
+      - /mnt/7F5DCC5C7797EDE5/Для разбора/Музыка:/downloads
+      - /mnt/7F5DCC5C7797EDE5/Синхронизация:/music
+    environment:
+      - RABBIT_AMPQ_URL=amqp://guest:guest@my_rabbit:5672
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+networks:
+  default:
+    external:
+      name: internal_network
+

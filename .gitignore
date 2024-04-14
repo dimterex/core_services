@@ -1,7 +1,2 @@
 .idea
 __pycache__
-
-black_list
-settings.json
-docker-compose.yml
-Dockerfile

@@ -2,6 +2,7 @@ import yaml
 import os
 import shutil
 import docker
+from git import Repo
 
 SOURCE_FOLDER = os.getcwd()
 TARGET_FOLDER = 'C:\\Users\\UseR\\Downloads\\Temp deploy'
@@ -11,7 +12,6 @@ WEB_HOST_SERVICE = 'web_host'
 WEB_HOST_PAGES = 'pages'
 
 DEBUG = False
-
 
 IGNORE_FOLDERS = [
     '.git',
@@ -27,9 +27,6 @@ DOCKER_COMPOSE_FILE = 'docker-compose.yml'
 UPDATE_SCRIPT_FILE_NAME = 'update.sh'
 DOCKER_REMOTE_BASE_URL = 'tcp://dimterex-ubuntu:2375'
 
-# ToDo:
-#  Если были изменения в гите в верхнеуровневой - поднимать версию
-
 
 def main():
     print("---- Starting deploy script")
@@ -38,10 +35,23 @@ def main():
         shutil.rmtree(TARGET_FOLDER)
     os.mkdir(TARGET_FOLDER)
 
-    for directory in os.listdir(SOURCE_FOLDER):
-        if directory in IGNORE_FOLDERS:
+    repo = Repo(SOURCE_FOLDER)
+    changes = repo.git.diff(None, name_only=True).splitlines()
+
+    changed_modules = []
+    for item in changes:
+        top_level_dir = item.split('/')[0]
+        if not os.path.isdir(top_level_dir):
             continue
-        if not os.path.isdir(directory):
+        if top_level_dir not in changed_modules:
+            changed_modules.append(top_level_dir)
+
+    print(f'Количество изменений: {len(changed_modules)}')
+    for dir_name in changed_modules:
+        print(dir_name)
+
+    for directory in changed_modules:
+        if directory in IGNORE_FOLDERS:
             continue
 
         docker_folder_path = os.path.join(TARGET_FOLDER, directory)

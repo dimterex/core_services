@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  todoist:
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - RABBIT_AMPQ_URL=amqp://guest:guest@my_rabbit:5672
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+networks:
+  default:
+    external:
+      name: internal_network

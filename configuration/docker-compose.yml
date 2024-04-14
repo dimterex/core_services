@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  configuration:
+    volumes:
+      - /mnt/7F5DCC5C7797EDE5/Releases/docker/storage:/storage
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - RABBIT_AMPQ_URL=amqp://guest:guest@my_rabbit:5672
+      - STORAGE=/storage
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+networks:
+  default:
+    external:
+      name: internal_network
+

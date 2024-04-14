@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  docker_bot:
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - RABBIT_AMPQ_URL=amqp://guest:guest@my_rabbit:5672
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+networks:
+  default:
+    external:
+      name: internal_network
