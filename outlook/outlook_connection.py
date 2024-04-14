@@ -5,9 +5,9 @@ from exchangelib.protocol import BaseProtocol
 
 import requests.adapters
 
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
-from outlook.models.outlook_meeting import Outlook_Meeting
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
+from core.rabbitmq.messages.outlook.outlook_meeting import Outlook_Meeting
 
 
 class RootCAAdapter(requests.adapters.HTTPAdapter):

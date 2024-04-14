@@ -1,6 +1,6 @@
 from jira import JIRA
 
-from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
+from core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
 
 
 class Jira_Connection:

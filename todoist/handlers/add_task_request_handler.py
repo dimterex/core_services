@@ -1,10 +1,10 @@
 from todoist_api_python.api import TodoistAPI
 
-from modules.core.rabbitmq.messages.configuration.todoits_categories.add_new_todoist_task_request import \
+from core.rabbitmq.messages.configuration.todoits_categories.add_new_todoist_task_request import \
     ADD_NEW_TODOIST_TASK_REQUEST_MESSAGE_TYPE, AddNewTodoistTaskRequest
-from modules.core.rabbitmq.messages.status_response import StatusResponse
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.messages.status_response import StatusResponse
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class AddTaskRequestHandler(RpcBaseHandler):

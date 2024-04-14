@@ -1,10 +1,10 @@
 from jira_tracker.jira_connection import Jira_Connection
 from jira_tracker.models.history_service import History_Service
-from modules.core.helpers.helper import convert_rawdate_with_timezone_to_datetime
-from modules.core.rabbitmq.messages.jira_tracker.write_worklog_request import WRITE_WORKLOG_REQUEST_MESSAGE_TYPE, WriteWorklogsRequest
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.status_response import StatusResponse, ERROR_STATUS_CODE
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.helpers.helper import convert_rawdate_with_timezone_to_datetime
+from core.rabbitmq.messages.jira_tracker.write_worklog_request import WRITE_WORKLOG_REQUEST_MESSAGE_TYPE, WriteWorklogsRequest
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.status_response import StatusResponse, ERROR_STATUS_CODE
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class WriteWorklogRequestHandler(RpcBaseHandler):

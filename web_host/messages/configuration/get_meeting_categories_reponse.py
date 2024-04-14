@@ -1,4 +1,4 @@
-from web_host.messages.base_response import BaseResponse
+from core.http_server.base_response import BaseResponse
 
 
 class MeetingCategoriesResponse(BaseResponse):

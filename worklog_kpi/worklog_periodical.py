@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from modules.core.rabbitmq.messages.configuration.periodical_task_model import PeriodicalTaskModel
-from modules.core.rabbitmq.messages.configuration.periodical_tasks.get_periodical_tasks_request import \
+from core.rabbitmq.messages.configuration.periodical_task_model import PeriodicalTaskModel
+from core.rabbitmq.messages.configuration.periodical_tasks.get_periodical_tasks_request import \
     GetPeriodicalTasksRequest
-from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
-from modules.core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
-from modules.core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
+from core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.log_service.log_service import Logger_Service
 from worklog_kpi.services.worklog_service import Worklog_Service
 
 

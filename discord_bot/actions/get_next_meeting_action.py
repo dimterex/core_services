@@ -1,11 +1,11 @@
 import datetime
 
 from discord_bot.bot.discord_bot import Discord_Bot
-from modules.core.rabbitmq.messages.identificators import OUTLOOK_QUEUE, MESSAGE_PAYLOAD
-from modules.core.helpers.helper import convert_rawdate_to_datetime, convert_rawdate_with_timezone_to_datetime
+from core.rabbitmq.messages.identificators import OUTLOOK_QUEUE
+from core.helpers.helper import convert_rawdate_to_datetime, convert_rawdate_with_timezone_to_datetime
 
-from modules.core.rabbitmq.messages.outlook.get_events_by_date_request import GetEventsByDateRequest
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.rabbitmq.messages.outlook.get_events_by_date_request import GetEventsByDateRequest
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 
 
 class Get_Next_Meeting_Action:

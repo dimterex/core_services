@@ -1,11 +1,11 @@
 from yandex_music import Search
 
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.status_response import StatusResponse
-from modules.core.rabbitmq.messages.tracks.get_track_metadata_request import GET_TRACK_METADATA_REQUEST_MESSAGE_TYPE, \
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.status_response import StatusResponse
+from core.rabbitmq.messages.tracks.get_track_metadata_request import GET_TRACK_METADATA_REQUEST_MESSAGE_TYPE, \
     GetTrackMetadataRequest
-from modules.core.rabbitmq.messages.tracks.track_model import TrackModel
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.messages.tracks.track_model import TrackModel
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 from yandex.models.track_dto import TrackDto
 from yandex.services.yandex_service import YandexMusicService
 

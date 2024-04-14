@@ -7,15 +7,15 @@ from jira_tracker.handlers.get_statistics_request_handler import GetStatisticsRe
 from jira_tracker.handlers.write_worklog_request_handler import WriteWorklogRequestHandler
 from jira_tracker.jira_connection import Jira_Connection
 from jira_tracker.models.history_service import History_Service
-from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
-from modules.core.rabbitmq.messages.configuration.credentials.get_credentials_request import GetCredentialsRequest
-from modules.core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
-from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, JIRA_QUEUE, JIRA_URL_TYPE
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
-from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
-from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
-from modules.core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
+from core.rabbitmq.messages.configuration.credentials.get_credentials_request import GetCredentialsRequest
+from core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
+from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, JIRA_QUEUE, JIRA_URL_TYPE
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
+from core.rabbitmq.rpc.rcp_api_controller import RpcApiController
+from core.rabbitmq.rpc.rpc_consumer import RpcConsumer
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.log_service.log_service import Logger_Service
 
 RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 

@@ -2,11 +2,11 @@ import os
 import time
 import warnings
 
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
-from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
-from modules.core.rabbitmq.messages.identificators import WORKLOG_QUEUE
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.rpc.rcp_api_controller import RpcApiController
+from core.rabbitmq.rpc.rpc_consumer import RpcConsumer
+from core.rabbitmq.messages.identificators import WORKLOG_QUEUE
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from worklog_kpi.handlers.get_history_by_date_worklog_request_handler import GetHistoryByDateWorklogRequestHandler
 from worklog_kpi.handlers.write_worklog_request_handler import Write_Worklog_Request_Handler
 from worklog_kpi.services.worklog_storage_service import WorklogStorageService

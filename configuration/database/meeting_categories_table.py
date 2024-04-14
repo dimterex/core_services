@@ -1,6 +1,6 @@
 from configuration.database.base_table import BaseTable
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.configuration.category_model import CategoryModel
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.configuration.category_model import CategoryModel
 
 ID_COLUMN_NAME = "id"
 MEETING_CATEGORIES_TABLE_NAME = 'meeting_categories'

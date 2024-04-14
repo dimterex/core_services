@@ -1,9 +1,9 @@
 from configuration.database.tracks_table import TracksTable
-from modules.core.rabbitmq.messages.configuration.tracks.remove_tracks_request import \
+from core.rabbitmq.messages.configuration.tracks.remove_tracks_request import \
     REMOVE_TRACKS_REQUEST_MESSAGE_TYPE, RemoveTracksRequest
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
 
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class RemoveTracksRequestHandler(RpcBaseHandler):

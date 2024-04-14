@@ -4,6 +4,11 @@ import warnings
 
 from configuration.database.configuration_storage import ConfigurationStorage
 from configuration.handlers.credentials.get_credentials_request_handler import GetCredentialsRequestHandler
+from configuration.handlers.iptv_black_list.add_black_list_item_request_handler import AddBlackListItemRequestHandler
+from configuration.handlers.iptv_black_list.get_black_list_request_handler import GetBlackListRequestHandler
+from configuration.handlers.iptv_black_list.remove_black_list_item__request_handler import \
+    RemoveBlackListItemRequestHandler
+from configuration.handlers.iptv_source.get_iptv_sources_request_handler import GetIptvSourcesRequestHandler
 from configuration.handlers.meetings_caegories.add_new_meeting_category_request_handler import \
     AddNewMeetingCategoryRequestHandler
 from configuration.handlers.meetings_caegories.remove_meeting_categories_request_handler import \
@@ -43,11 +48,11 @@ from configuration.handlers.todoist_caegories.get_todoits_categories_request_han
     GetTodoistCategoriesRequestHandler
 from configuration.handlers.todoist_caegories.set_todoist_categories_request_handler import \
     SetTodoitsCategoriesRequestHandler
-from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
-from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
-from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
+from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
+from core.rabbitmq.rpc.rcp_api_controller import RpcApiController
+from core.rabbitmq.rpc.rpc_consumer import RpcConsumer
 
-from modules.core.log_service.log_service import Logger_Service
+from core.log_service.log_service import Logger_Service
 
 RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 STORAGE_FOLDER_ENVIRON = 'STORAGE'
@@ -103,6 +108,12 @@ def main():
     api_controller.subscribe(AddNewTrackRequestHandler(storage.tracks_table))
     api_controller.subscribe(GetTrackRequestHandler(storage.tracks_table))
     api_controller.subscribe(GetTracksRequestHandler(storage.tracks_table))
+
+    # iptv
+    api_controller.subscribe(AddBlackListItemRequestHandler(storage.iptv_black_list_table))
+    api_controller.subscribe(GetBlackListRequestHandler(storage.iptv_black_list_table))
+    api_controller.subscribe(RemoveBlackListItemRequestHandler(storage.iptv_black_list_table))
+    api_controller.subscribe(GetIptvSourcesRequestHandler(storage.iptv_sources_table))
 
     rcp = RpcConsumer(ampq_url, CONFIGURATION_QUEUE, api_controller)
     rcp.start()

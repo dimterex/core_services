@@ -2,10 +2,10 @@ import os
 import time
 
 from docker_bot.handlers.get_container_with_ports_request_handler import GetContainerWithPortsRequestHandler
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.identificators import DOCKER_QUEUE
-from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
-from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.identificators import DOCKER_QUEUE
+from core.rabbitmq.rpc.rcp_api_controller import RpcApiController
+from core.rabbitmq.rpc.rpc_consumer import RpcConsumer
 
 RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 

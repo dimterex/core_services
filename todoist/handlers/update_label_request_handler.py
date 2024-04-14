@@ -1,13 +1,10 @@
 from todoist_api_python.api import TodoistAPI
-from todoist_api_python.endpoints import get_sync_url
-from todoist_api_python.http_requests import get
-from todoist_api_python.models import Task
 
-from modules.core.rabbitmq.messages.status_response import StatusResponse
-from modules.core.rabbitmq.messages.todoist.update_label_request import UPDATE_LABEL_MESSAGE_TYPE, \
+from core.rabbitmq.messages.status_response import StatusResponse
+from core.rabbitmq.messages.todoist.update_label_request import UPDATE_LABEL_MESSAGE_TYPE, \
     UPDATE_LABEL_TODOIST_TASK_ID, UPDATE_LABEL_TODOIST_TASK_LABEL
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class UpdateLabelRequestHandler(RpcBaseHandler):

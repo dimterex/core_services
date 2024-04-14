@@ -4,12 +4,12 @@ from typing import Awaitable
 from aiohttp.abc import Request
 from aiohttp.web_response import StreamResponse
 
-from modules.core.helpers.helper import convert_rawdate_to_datetime
-from modules.core.http_server.base_executor import BaseExecutor
-from modules.core.rabbitmq.messages.identificators import OUTLOOK_QUEUE
-from modules.core.rabbitmq.messages.outlook.get_events_by_date_request import GetEventsByDateRequest
-from modules.core.rabbitmq.messages.status_response import StatusResponse, SUCCESS_STATUS_CODE
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.helpers.helper import convert_rawdate_to_datetime
+from core.http_server.base_executor import BaseExecutor
+from core.rabbitmq.messages.identificators import OUTLOOK_QUEUE
+from core.rabbitmq.messages.outlook.get_events_by_date_request import GetEventsByDateRequest
+from core.rabbitmq.messages.status_response import StatusResponse, SUCCESS_STATUS_CODE
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from web_host.messages.get_day_events_response import DayEventsResponse
 
 

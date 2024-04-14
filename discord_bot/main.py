@@ -3,17 +3,18 @@ import os
 
 from actions.get_next_meeting_action import Get_Next_Meeting_Action
 from actions.write_worklog_action import Write_Worklog_Action
+from core.rabbitmq.messages.discord.send_message import DISCORD_SEND_MESSAGE
 from discord_bot.bot.discord_bot import Discord_Bot
 from discord_bot.bot.command_controller import Command_Controller, NEXT_MEETING_COMMAND, WRITE_LOG_COMMAND
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
-from modules.core.rabbitmq.api_controller import Api_Controller
-from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, DISCORD_SEND_MESSAGE, DISCORD_QUEUE, \
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.rabbitmq.api_controller import Api_Controller
+from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, DISCORD_QUEUE, \
     DISCORD_TOKEN
-from modules.core.rabbitmq.publisher import Publisher
-from modules.core.rabbitmq.receive import Consumer
+from core.rabbitmq.publisher import Publisher
+from core.rabbitmq.receive import Consumer
 
 RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 

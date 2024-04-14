@@ -1,6 +1,6 @@
 import sqlite3
 
-from modules.core.log_service.log_service import Logger_Service
+from core.log_service.log_service import Logger_Service
 
 
 class BaseTable:

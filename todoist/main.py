@@ -4,15 +4,14 @@ import warnings
 
 from todoist_api_python.api import TodoistAPI
 
-from modules.core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
-from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, TODOIST_QUEUE, TODOIST_TOKEN
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
-from modules.core.rabbitmq.messages.todoist.update_label_request import UpdateLabelRequest
-from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
-from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
+from core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
+from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, TODOIST_QUEUE, TODOIST_TOKEN
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
+from core.rabbitmq.rpc.rcp_api_controller import RpcApiController
+from core.rabbitmq.rpc.rpc_consumer import RpcConsumer
 
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from todoist.handlers.add_task_request_handler import AddTaskRequestHandler
 from todoist.handlers.get_completed_tasks_request_handler import GetCompletedTasksRequestHandler
 from todoist.handlers.update_label_request_handler import UpdateLabelRequestHandler

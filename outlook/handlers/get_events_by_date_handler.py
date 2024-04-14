@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from modules.core.helpers.helper import convert_rawdate_with_timezone_to_datetime
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.outlook.get_events_by_date_request import GET_CALENDAR_BY_DATE_REQUEST, \
+from core.helpers.helper import convert_rawdate_with_timezone_to_datetime
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.outlook.get_events_by_date_request import GET_CALENDAR_BY_DATE_REQUEST, \
     GET_CALENDAR_DATE_PROPERTY
-from modules.core.rabbitmq.messages.status_response import StatusResponse
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
-from outlook.models.outlook_meeting import Outlook_Meeting
+from core.rabbitmq.messages.status_response import StatusResponse
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.messages.outlook.outlook_meeting import Outlook_Meeting
 from outlook.outlook_connection import Outlook_Connection
 
 

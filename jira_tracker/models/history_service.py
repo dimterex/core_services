@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 
 from jira_tracker.jira_connection import Jira_Connection
 from jira_tracker.models.worklog_day import WorklogDay
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
 
 
 class History_Service:

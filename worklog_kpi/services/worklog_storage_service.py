@@ -3,7 +3,7 @@ import os
 
 import sqlite3
 
-from modules.core.log_service.log_service import Logger_Service, ERROR_LOG_LEVEL
+from core.log_service.log_service import Logger_Service
 from worklog_kpi.models.worklog_sqlite_model import WorklogSqliteModel
 
 WORKLOG_DATABASE_NAME = 'wokrlog_kpi.sqlite'

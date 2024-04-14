@@ -1,9 +1,9 @@
 from configuration.database.todoist_categories_table import TodoistCategoriesTable
-from modules.core.rabbitmq.messages.configuration.todoits_categories.remove_todoist_categories_request import \
+from core.rabbitmq.messages.configuration.todoits_categories.remove_todoist_categories_request import \
     REMOVE_TODOIST_CATEGORIES_REQUEST_MESSAGE_TYPE, RemoveTodoistCategoriesRequest
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
 
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class RemoveTodoistCategoriesRequestHandler(RpcBaseHandler):

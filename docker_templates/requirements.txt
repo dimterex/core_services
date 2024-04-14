@@ -10,3 +10,7 @@ docker
 aio-pika
 yandex-music
 mutagen
+soundcloud-lib
+lxml
+requests-html
+jsonpath_rw

@@ -1,8 +1,8 @@
 from jira_tracker.models.history_service import History_Service
-from modules.core.rabbitmq.messages.jira_tracker.get_statistics_request import GET_STATISTICS_REQUEST_MESSAGE_TYPE, GetStatisticsRequest
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.status_response import StatusResponse
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.messages.jira_tracker.get_statistics_request import GET_STATISTICS_REQUEST_MESSAGE_TYPE, GetStatisticsRequest
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.status_response import StatusResponse
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class GetStatisticsRequestHandler(RpcBaseHandler):

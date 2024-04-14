@@ -4,8 +4,8 @@ import discord
 from discord.ext import commands
 
 from discord_bot.bot.command_controller import Command_Controller, NEXT_MEETING_COMMAND, WRITE_LOG_COMMAND
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.publisher import Publisher
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.publisher import Publisher
 
 
 class Discord_Bot:

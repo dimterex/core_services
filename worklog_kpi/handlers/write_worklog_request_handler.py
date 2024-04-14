@@ -1,9 +1,8 @@
-from modules.core.helpers.helper import convert_rawdate_to_datetime
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.status_response import StatusResponse
-from modules.core.rabbitmq.messages.worklog.write_worklog_request import WORKLOG_WRITE_MESSAGE_REQUEST_TYPE, \
+from core.helpers.helper import convert_rawdate_to_datetime
+from core.rabbitmq.messages.status_response import StatusResponse
+from core.rabbitmq.messages.worklog.write_worklog_request import WORKLOG_WRITE_MESSAGE_REQUEST_TYPE, \
     WORKLOG_WRITE_MESSAGE_REQUEST_DAY_PROPERTY
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 from worklog_kpi.write_worklog_action import Write_WorkLok_Action
 
 

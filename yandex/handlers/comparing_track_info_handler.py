@@ -4,12 +4,12 @@ import os
 import re
 import threading
 
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.identificators import TRACKS_QUEUE
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
-from modules.core.rabbitmq.messages.tracks.get_track_metadata_request import GetTrackMetadataRequest
-from modules.core.rabbitmq.messages.tracks.track_model import TrackModel
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.identificators import TRACKS_QUEUE
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
+from core.rabbitmq.messages.tracks.get_track_metadata_request import GetTrackMetadataRequest
+from core.rabbitmq.messages.tracks.track_model import TrackModel
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from yandex.services.tags_service import TagsService
 from yandex.services.yandex_service import YandexMusicService
 

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from yandex_music import Client, Search, Track
 
-from modules.core.log_service.log_service import Logger_Service
+from core.log_service.log_service import Logger_Service
 from yandex.models.track_dto import TrackDto
 from yandex.models.track_storage_dto import TrackStorageDto
 

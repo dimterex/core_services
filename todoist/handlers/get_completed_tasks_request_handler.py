@@ -7,12 +7,12 @@ from todoist_api_python.endpoints import get_sync_url
 from todoist_api_python.http_requests import get
 from todoist_api_python.models import Task
 
-from modules.core.helpers.helper import convert_rawdate_to_datetime
-from modules.core.rabbitmq.messages.status_response import StatusResponse, ERROR_STATUS_CODE
-from modules.core.rabbitmq.messages.todoist.get_completed_tasks_request import COMPLETED_TASKS_REQUEST_MESSAGE_TYPE, \
+from core.helpers.helper import convert_rawdate_to_datetime
+from core.rabbitmq.messages.status_response import StatusResponse, ERROR_STATUS_CODE
+from core.rabbitmq.messages.todoist.get_completed_tasks_request import COMPLETED_TASKS_REQUEST_MESSAGE_TYPE, \
     COMPLETED_TASKS_REQUEST_DATE_PROPERTY
-from modules.core.log_service.log_service import DEBUG_LOG_LEVEL, Logger_Service, INFO_LOG_LEVEL, TRACE_LOG_LEVEL
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 from todoist.models.task_entry import Task_Entry
 from todoist.models.todoist_tasks import Todoist_Tasks
 

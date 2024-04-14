@@ -1,7 +1,7 @@
 import re
 
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.tracks.track_model import TrackModel
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.tracks.track_model import TrackModel
 from yandex.models.track_dto import TrackDto
 
 import mutagen

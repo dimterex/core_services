@@ -2,17 +2,17 @@ import os
 import time
 import warnings
 
-from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
-from modules.core.rabbitmq.messages.configuration.credentials.get_credentials_request import GetCredentialsRequest
-from modules.core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
-from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, OUTLOOK_URL_TYPE, \
+from core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
+from core.rabbitmq.messages.configuration.credentials.get_credentials_request import GetCredentialsRequest
+from core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
+from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, OUTLOOK_URL_TYPE, \
     OUTLOOK_QUEUE
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
-from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
-from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
+from core.rabbitmq.rpc.rcp_api_controller import RpcApiController
+from core.rabbitmq.rpc.rpc_consumer import RpcConsumer
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 
-from modules.core.log_service.log_service import Logger_Service
+from core.log_service.log_service import Logger_Service
 from outlook.handlers.get_events_by_date_handler import GetEventsByDateHandler
 from outlook.outlook_connection import Outlook_Connection
 

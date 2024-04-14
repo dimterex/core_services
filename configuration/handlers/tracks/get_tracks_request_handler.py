@@ -1,7 +1,7 @@
 from configuration.database.tracks_table import TracksTable
-from modules.core.rabbitmq.messages.configuration.tracks.get_tracks_request import GET_TRACKS_REQUEST_MESSAGE_TYPE
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.messages.configuration.tracks.get_tracks_request import GET_TRACKS_REQUEST_MESSAGE_TYPE
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class GetTracksRequestHandler(RpcBaseHandler):

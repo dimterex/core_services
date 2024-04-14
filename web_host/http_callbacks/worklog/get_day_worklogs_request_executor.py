@@ -3,12 +3,12 @@ from typing import Awaitable
 from aiohttp.abc import Request
 from aiohttp.web_response import StreamResponse
 
-from modules.core.helpers.helper import convert_rawdate_to_datetime
-from modules.core.http_server.base_executor import BaseExecutor
-from modules.core.rabbitmq.messages.identificators import WORKLOG_QUEUE
-from modules.core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE, StatusResponse
-from modules.core.rabbitmq.messages.worklog.get_history_by_date_request import GetHistoryByDateRequest
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.helpers.helper import convert_rawdate_to_datetime
+from core.http_server.base_executor import BaseExecutor
+from core.rabbitmq.messages.identificators import WORKLOG_QUEUE
+from core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE, StatusResponse
+from core.rabbitmq.messages.worklog.get_history_by_date_request import GetHistoryByDateRequest
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from web_host.messages.get_history_item_response import HistoryItemResponse
 
 

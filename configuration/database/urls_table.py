@@ -1,6 +1,6 @@
 from configuration.database.base_table import BaseTable
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.configuration.url_model import UrlModel
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.configuration.url_model import UrlModel
 
 ID_COLUMN_NAME = 'id'
 

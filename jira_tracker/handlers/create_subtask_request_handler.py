@@ -1,10 +1,10 @@
 from jira_tracker.jira_connection import Jira_Connection
-from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
-from modules.core.rabbitmq.messages.jira_tracker.create_subtask_request import CREATE_SUBTASK_REQUEST_NAME, \
+from core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
+from core.rabbitmq.messages.jira_tracker.create_subtask_request import CREATE_SUBTASK_REQUEST_NAME, \
     CREATE_SUBTASK_REQUEST_ROOT_ID, CREATE_SUBTASK_REQUEST_MESSAGE_TYPE
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.messages.status_response import StatusResponse
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.status_response import StatusResponse
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class CreateSubtaskRequestHandler(RpcBaseHandler):

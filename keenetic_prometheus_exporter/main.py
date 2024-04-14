@@ -4,13 +4,21 @@ from typing import Dict
 
 from jsonpath_rw import parse
 
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
+from core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
+from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, KEENETIC_ADMIN_ENDPOINT, KEENETIC_ADMIN_USERNAME, \
+    KEENETIC_ADMIN_PASSWORD
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from keenetic_prometheus_exporter.http_callbacks.metrics_request_executor import GetMetricsRequestExecutor
 from models.keenetic_api import KeeneticClient
 from models.keenetic_collecor import KeeneticCollector
-from modules.core.http_server.core_http_server import AiohttpHttpServer
-from modules.core.http_server.http_method import HTTPMethod
-from modules.core.http_server.http_route import HttpRoute
+from core.http_server.core_http_server import AiohttpHttpServer
+from core.http_server.http_method import HTTPMethod
+from core.http_server.http_route import HttpRoute
 
+RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 ADMIN_ENDPOINT = 'KEENETIC_ADMIN_ENDPOINT'
 LOGIN = 'KEENETIC_ADMIN_USERNAME'
 PASSWORD = 'KEENETIC_ADMIN_PASSWORD'
@@ -34,15 +42,29 @@ def json_path_init(paths: Dict[str, str]):
 
 if __name__ == '__main__':
     pwd = os.path.dirname(os.path.realpath(__file__))
-    admin_endpoint = os.environ[ADMIN_ENDPOINT]
-    login = os.environ[LOGIN]
-    password = os.environ[PASSWORD]
+
+    ampq_url = os.environ[RABBIT_CONNECTION_STRING]
+    logger_service = Logger_Service()
+
+    rpc_publisher = RpcPublisher(ampq_url)
+    admin_endpoint_response = rpc_publisher.call(CONFIGURATION_QUEUE, GetUrlRequest(KEENETIC_ADMIN_ENDPOINT))
+    if admin_endpoint_response.status == ERROR_STATUS_CODE:
+        raise Exception(admin_endpoint_response.message)
+
+    login_response = rpc_publisher.call(CONFIGURATION_QUEUE, GetTokenRequest(KEENETIC_ADMIN_USERNAME))
+    if login_response.status == ERROR_STATUS_CODE:
+        raise Exception(login_response.message)
+
+    password_response = rpc_publisher.call(CONFIGURATION_QUEUE, GetTokenRequest(KEENETIC_ADMIN_PASSWORD))
+    if password_response.status == ERROR_STATUS_CODE:
+        raise Exception(password_response.message)
+
     config_path = os.environ[CONFIG_PATH]
 
     metrics_configuration = json.load(open(config_path, "r"))
 
     collectors = []
-    keeneticClient = KeeneticClient(admin_endpoint, login, password)
+    keeneticClient = KeeneticClient(admin_endpoint_response.message, login_response.message, password_response.message)
 
     for metric_configuration in metrics_configuration['metrics']:
 

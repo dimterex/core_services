@@ -3,11 +3,11 @@ from typing import Awaitable
 from aiohttp.abc import Request
 from aiohttp.web_response import StreamResponse
 
-from jira_tracker.main import JIRA_QUEUE
-from modules.core.http_server.base_executor import BaseExecutor
-from modules.core.rabbitmq.messages.jira_tracker.get_statistics_request import GetStatisticsRequest
-from modules.core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.http_server.base_executor import BaseExecutor
+from core.rabbitmq.messages.identificators import JIRA_QUEUE
+from core.rabbitmq.messages.jira_tracker.get_statistics_request import GetStatisticsRequest
+from core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from web_host.messages.statistics.get_month_times_response import MonthTimesResponse
 
 

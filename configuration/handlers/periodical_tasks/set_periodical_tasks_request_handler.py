@@ -1,8 +1,8 @@
 from configuration.database.periodical_tasks_table import PeriodicalTasksTable
-from modules.core.rabbitmq.messages.configuration.periodical_tasks.set_periodical_tasks_request import \
+from core.rabbitmq.messages.configuration.periodical_tasks.set_periodical_tasks_request import \
     SET_PERIODICAL_TASKS_REQUEST_MESSAGE_TYPE, SetPeriodicalTasksRequest
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class SetPeriodicalTasksRequestHandler(RpcBaseHandler):

@@ -1,17 +1,14 @@
 import os
-import time
 import warnings
 
-from modules.core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
-from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, TRACKS_QUEUE, YANDEX_TOKEN
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
-from modules.core.rabbitmq.messages.tracks.get_track_metadata_request import GetTrackMetadataRequest
-from modules.core.rabbitmq.rpc.rcp_api_controller import RpcApiController
-from modules.core.rabbitmq.rpc.rpc_consumer import RpcConsumer
+from core.rabbitmq.messages.configuration.tokens.get_token_request import GetTokenRequest
+from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, TRACKS_QUEUE, YANDEX_TOKEN
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE
+from core.rabbitmq.rpc.rcp_api_controller import RpcApiController
+from core.rabbitmq.rpc.rpc_consumer import RpcConsumer
 
-from modules.core.log_service.log_service import Logger_Service
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
-from yandex.handlers.comparing_track_info_handler import ComparingTrackInfoHandler
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from yandex.handlers.download_likes_tracks_handler import DownloadLikesTracksHandler
 from yandex.handlers.get_track_metadata_request_handler import GetTrackMetadataRequestHandler
 from yandex.services.tags_service import TagsService
@@ -39,8 +36,6 @@ def main():
     rcp = RpcConsumer(ampq_url, TRACKS_QUEUE, api_controller)
     api_controller.subscribe(GetTrackMetadataRequestHandler(logger_service, yandexService))
     rcp.start()
-    # comparing_handler = ComparingTrackInfoHandler(DOWNLOAD_DIRECTORY_PATH, yandexService, trackService, logger_service, rpc_publisher)
-    # comparing_handler.start('/music')
 
 
 if __name__ == '__main__':

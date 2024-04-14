@@ -1,10 +1,10 @@
 import docker
 
 from docker_bot.models.container_model import ContainerModel
-from modules.core.rabbitmq.messages.docker_bot.get_container_with_ports_request import \
+from core.rabbitmq.messages.docker_bot.get_container_with_ports_request import \
     GET_CONTAINERS_WITH_PORTS_REQUEST_MESSAGE_TYPE
-from modules.core.rabbitmq.messages.status_response import StatusResponse
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.messages.status_response import StatusResponse
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 
 
 class GetContainerWithPortsRequestHandler(RpcBaseHandler):

@@ -1,8 +1,8 @@
-from modules.core.helpers.helper import convert_rawdate_to_datetime
-from modules.core.rabbitmq.messages.status_response import StatusResponse
-from modules.core.rabbitmq.messages.worklog.get_history_by_date_request import GET_HISTORY_BY_DATE_REQUEST_TYPE, \
+from core.helpers.helper import convert_rawdate_to_datetime
+from core.rabbitmq.messages.status_response import StatusResponse
+from core.rabbitmq.messages.worklog.get_history_by_date_request import GET_HISTORY_BY_DATE_REQUEST_TYPE, \
     GET_HISTORY_BY_DATE_REQUEST_DAY_PROPERTY
-from modules.core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
+from core.rabbitmq.rpc.rpc_base_handler import RpcBaseHandler
 from worklog_kpi.models.worklog_sqlite_model import WorklogSqliteModel
 from worklog_kpi.services.worklog_storage_service import WorklogStorageService
 

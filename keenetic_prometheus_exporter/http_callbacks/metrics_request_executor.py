@@ -1,13 +1,11 @@
-import json
 from typing import Awaitable
 
 from aiohttp.abc import Request
-from aiohttp import web
 from aiohttp.web_response import Response, StreamResponse
 
 from keenetic_prometheus_exporter.models.keenetic_api import KeeneticClient
 from keenetic_prometheus_exporter.models.keenetic_collecor import KeeneticCollector
-from modules.core.http_server.base_executor import BaseExecutor
+from core.http_server.base_executor import BaseExecutor
 
 
 class GetMetricsRequestExecutor(BaseExecutor):

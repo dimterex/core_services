@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from modules.core.helpers.helper import SECONDS_IN_HOUR
+from core.helpers.helper import SECONDS_IN_HOUR
 
 
 class WorklogDay:

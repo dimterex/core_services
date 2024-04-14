@@ -1,5 +1,5 @@
-from modules.core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
-from web_host.messages.base_response import BaseResponse
+from core.rabbitmq.messages.configuration.credentials.credential_model import CredentialModel
+from core.http_server.base_response import BaseResponse
 
 
 class CredentialsResponse(BaseResponse):

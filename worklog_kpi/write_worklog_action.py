@@ -1,24 +1,24 @@
 import datetime
 
-from modules.core.helpers.helper import convert_rawdate_with_timezone_to_datetime
-from modules.core.rabbitmq.messages.configuration.category_model import CategoryModel
-from modules.core.rabbitmq.messages.configuration.meeting_categories.get_meeting_categories_request import \
+from core.helpers.helper import convert_rawdate_with_timezone_to_datetime
+from core.rabbitmq.messages.configuration.category_model import CategoryModel
+from core.rabbitmq.messages.configuration.meeting_categories.get_meeting_categories_request import \
     GetMeetingCategoriesRequest
-from modules.core.rabbitmq.messages.configuration.todoits_categories.get_todoits_categories_request import \
+from core.rabbitmq.messages.configuration.todoits_categories.get_todoits_categories_request import \
     GetTodoitsCategoriesRequest
-from modules.core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
-from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, JIRA_URL_TYPE, OUTLOOK_QUEUE, \
+from core.rabbitmq.messages.configuration.urls.get_url_request import GetUrlRequest
+from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE, JIRA_URL_TYPE, OUTLOOK_QUEUE, \
     JIRA_QUEUE, TODOIST_QUEUE
-from modules.core.rabbitmq.messages.outlook.get_events_by_date_request import GetEventsByDateRequest
-from modules.core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
-from modules.core.rabbitmq.messages.todoist.get_completed_tasks_request import GetCompletedTasksRequest
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.rabbitmq.messages.outlook.get_events_by_date_request import GetEventsByDateRequest
+from core.rabbitmq.messages.status_response import ERROR_STATUS_CODE, StatusResponse
+from core.rabbitmq.messages.todoist.get_completed_tasks_request import GetCompletedTasksRequest
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 
-from modules.core.rabbitmq.messages.jira_tracker.create_subtask_request import CreateSubTaskRequest
-from modules.core.rabbitmq.messages.jira_tracker.write_worklog_request import WriteWorklogsRequest
-from modules.core.rabbitmq.messages.todoist.update_label_request import UpdateLabelRequest
-from modules.core.log_service.log_service import Logger_Service
-from outlook.models.outlook_meeting import GET_CALENDAR_BY_DATE_RESPONSE_EVENT_CATEGORIES_PROPERTY, \
+from core.rabbitmq.messages.jira_tracker.create_subtask_request import CreateSubTaskRequest
+from core.rabbitmq.messages.jira_tracker.write_worklog_request import WriteWorklogsRequest
+from core.rabbitmq.messages.todoist.update_label_request import UpdateLabelRequest
+from core.log_service.log_service import Logger_Service
+from core.rabbitmq.messages.outlook.outlook_meeting import GET_CALENDAR_BY_DATE_RESPONSE_EVENT_CATEGORIES_PROPERTY, \
     GET_CALENDAR_BY_DATE_RESPONSE_EVENT_NAME_PROPERTY, GET_CALENDAR_BY_DATE_RESPONSE_EVENT_START_TIME_PROPERTY, \
     GET_CALENDAR_BY_DATE_RESPONSE_EVENT_DURATION_PROPERTY
 from worklog_kpi.models.worklog_sqlite_model import WorklogSqliteModel

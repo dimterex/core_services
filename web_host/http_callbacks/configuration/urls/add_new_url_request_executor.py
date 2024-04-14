@@ -3,10 +3,10 @@ from typing import Awaitable
 from aiohttp.abc import Request
 from aiohttp.web_response import StreamResponse
 
-from modules.core.http_server.base_executor import BaseExecutor
-from modules.core.rabbitmq.messages.configuration.urls.add_new_url_request import AddNewUrlRequest
-from modules.core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.http_server.base_executor import BaseExecutor
+from core.rabbitmq.messages.configuration.urls.add_new_url_request import AddNewUrlRequest
+from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from web_host.messages.configuration.set_base_reponse import SetBaseResponse
 
 

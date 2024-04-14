@@ -3,11 +3,11 @@ from aiohttp.web_response import StreamResponse
 
 from typing import Awaitable
 
-from modules.core.http_server.base_executor import BaseExecutor
-from modules.core.rabbitmq.messages.identificators import SYNC_APPLICATION_QUEUE
-from modules.core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE, StatusResponse
-from modules.core.rabbitmq.messages.sync_application.get_history_request import GetSyncHistoryRequest
-from modules.core.rabbitmq.rpc.rpc_publisher import RpcPublisher
+from core.http_server.base_executor import BaseExecutor
+from core.rabbitmq.messages.identificators import SYNC_APPLICATION_QUEUE
+from core.rabbitmq.messages.status_response import SUCCESS_STATUS_CODE, StatusResponse
+from core.rabbitmq.messages.sync_application.get_history_request import GetSyncHistoryRequest
+from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 from web_host.messages.sync.sync_history_response import SyncHistoryResponse
 
 
