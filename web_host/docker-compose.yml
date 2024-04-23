@@ -12,7 +12,7 @@ services:
       - RABBIT_AMPQ_URL=amqp://guest:guest@my_rabbit:5672
       - PYTHONUNBUFFERED=1
       - STATIC_PATH=/app/pages
-      - IPTV_PLAYLIST_PATH=/storage/test.m3u
+      - IPTV_PLAYLIST_PATH=/storage/custom.m3u
     restart: unless-stopped
 
 networks:

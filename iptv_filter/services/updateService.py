@@ -33,6 +33,6 @@ class UpdateService(ScheduleService):
         channel_black_list = [element.value.lower() for element in black_list if element.type == CHANNEL_TYPE]
         self.iptvModificationService.remove_channels(channel_black_list)
 
-        self.iptvModificationService.remove_unworking()
+        # self.iptvModificationService.remove_unworking()
         self.iptvModificationService.apply()
         self.iptvModificationService.saveFile()

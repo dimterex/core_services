@@ -87,5 +87,5 @@ class IptvModificationService:
             for channel in self.channel_list:
                 for item in channel.toRaw():
                     file.write("%s\n" % item)
-                self.logger_Service.trace(self.TAG, f'{channel.title}; group: {channel.group};')
+                # self.logger_Service.trace(self.TAG, f'{channel.title}; group: {channel.group};')
         self.logger_Service.info(self.TAG, f'Saved {len(self.channel_list)} channels.')
