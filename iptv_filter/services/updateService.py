@@ -1,7 +1,8 @@
 from iptv_filter.services.iptvModificationService import IptvModificationService
 from core.helpers.scheduleService import ScheduleService
 from core.log_service.log_service import Logger_Service
-from core.rabbitmq.messages.configuration.iptv_black_list_item_model import IptvBlackListItemModel, CHANNEL_TYPE, CATEGORY_TYPE
+from core.rabbitmq.messages.configuration.iptv_black_list_item_model import IptvBlackListItemModel, CHANNEL_TYPE, \
+    CATEGORY_TYPE, REGEX_TYPE
 from core.rabbitmq.messages.configuration.iptv_source_model import IptvSourceModel
 from core.rabbitmq.messages.identificators import CONFIGURATION_QUEUE
 from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
@@ -22,7 +23,16 @@ class UpdateService(ScheduleService):
         black_list: [IptvBlackListItemModel] = [IptvBlackListItemModel.deserialize(element) for element in black_list_raw.message]
         sources: [str] = [IptvSourceModel.deserialize(element).value for element in sources_raw.message]
 
-        channel_black_list = [element.value for element in black_list if element.type == CHANNEL_TYPE]
+        self.iptvModificationService.initialize(sources)
         category_black_list = [element.value for element in black_list if element.type == CATEGORY_TYPE]
+        self.iptvModificationService.remove_categories(category_black_list)
 
-        self.iptvModificationService.parse(sources, channel_black_list, category_black_list)
+        regex_black_list = [element.value for element in black_list if element.type == REGEX_TYPE]
+        self.iptvModificationService.remove_regex(regex_black_list)
+
+        channel_black_list = [element.value.lower() for element in black_list if element.type == CHANNEL_TYPE]
+        self.iptvModificationService.remove_channels(channel_black_list)
+
+        self.iptvModificationService.remove_unworking()
+        self.iptvModificationService.apply()
+        self.iptvModificationService.saveFile()

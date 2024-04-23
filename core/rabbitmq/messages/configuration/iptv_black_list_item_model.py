@@ -4,6 +4,7 @@ IPTV_BLACK_LIST_ITEM_MODEL_ID = 'id'
 
 CHANNEL_TYPE = 'channel'
 CATEGORY_TYPE = 'category'
+REGEX_TYPE = 'regex'
 
 
 class IptvBlackListItemModel:

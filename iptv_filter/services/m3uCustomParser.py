@@ -7,14 +7,16 @@ from iptv_filter.services.linkCheckerService import LinkCheckerService
 
 
 class M3uParser:
-    def __init__(self, url: str, channel_black_list: [str], category_black_list: [str], link_checker: LinkCheckerService):
+    def __init__(self, url: str, link_checker: LinkCheckerService):
         self.link_checker = link_checker
         self.channels: [ExtM3uInformation] = []
-        self.channel_black_list = channel_black_list
-        self.category_black_list = category_black_list
+        self.channel_black_list = []
+        self.category_black_list = []
         with urllib.request.urlopen(url) as response:
             content = response.read()
             self.content = content.decode("utf-8")
+
+        self.parse()
 
     def parse(self):
         lines = self.content.splitlines()
@@ -46,33 +48,13 @@ class M3uParser:
             logo = self.checkRegex("tvg-logo=\"(.*?)\"", lineInfo)
             group = self.checkRegex("group-title=\"(.*?)\"", lineInfo)
             title = self.checkRegex("[,](?!.*[,])(.*?)$", lineInfo)
+            if title.startswith(' '):
+                title = title[1:]
+            if title.endswith(' '):
+                title = title[:-1]
 
-            if group in self.category_black_list:
-                return
-
-            channel_name, channel_format = self.parseChannelName(title)
-
-            if channel_name in self.channel_black_list:
-                return
-            if not self.link_checker.check(lineLink):
-                return
             inf = ExtM3uInformation(title, name, id, logo, group, lineLink, extvcopt)
             self.channels.append(inf)
-
-    def parseChannelName(self, input_string):
-        # Определение шаблона регулярного выражения
-        pattern = r'(.+?)\s+(\(.+?\))'
-
-        # Поиск совпадений с помощью регулярного выражения
-        match = re.match(pattern, input_string)
-
-        if match:
-            # Извлечение групп из совпадения
-            part1 = match.group(1)
-            part2 = match.group(2)
-            return part1, part2
-        else:
-            return input_string, None
 
     def checkRegex(self, regex_value: str, line: str):
         m = re.search(regex_value, line)
