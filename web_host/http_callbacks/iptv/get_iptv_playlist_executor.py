@@ -8,7 +8,7 @@ from core.http_server.base_executor import BaseExecutor
 from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 
 
-class GetIptvPlaylistExecutor(BaseExecutor):
+class GetFileExecutor(BaseExecutor):
     def __init__(self, rpcPublisher: RpcPublisher, playlist_path: str):
         self.playlist_path = playlist_path
         self.rpcPublisher = rpcPublisher

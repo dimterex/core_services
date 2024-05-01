@@ -13,6 +13,7 @@ services:
       - PYTHONUNBUFFERED=1
       - STATIC_PATH=/app/pages
       - IPTV_PLAYLIST_PATH=/storage/custom.m3u
+      - IPTV_EPG_PATH=/storage/epg.xml
     restart: unless-stopped
 
 networks:

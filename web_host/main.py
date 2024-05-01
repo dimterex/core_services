@@ -26,7 +26,7 @@ from web_host.http_callbacks.configuration.tokens.remove_tokens_request_executor
 from web_host.http_callbacks.configuration.tokens.set_tokens_request_executor import SetTokensRequestExecutor
 from web_host.http_callbacks.configuration.urls.remove_urls_request_executor import RemoveUrlsRequestExecutor
 from web_host.http_callbacks.configuration.urls.set_urls_request_executor import SetUrlsRequestExecutor
-from web_host.http_callbacks.iptv.get_iptv_playlist_executor import GetIptvPlaylistExecutor
+from web_host.http_callbacks.iptv.get_iptv_playlist_executor import GetFileExecutor
 from web_host.http_callbacks.sync_application.get_sync_history_request_executor import GetSyncHistoryRequestExecutor
 from web_host.http_callbacks.worklog.get_day_events_request_executor import GetDayEventsRequestExecutor
 from web_host.http_callbacks.worklog.get_day_worklogs_request_executor import GetDayWorklogsRequestExecutor
@@ -38,6 +38,7 @@ from web_host.http_callbacks.container.get_container_with_ports_request_executor
 
 STATIC_PATH = 'STATIC_PATH'
 IPTV_PLAYLIST_PATH = 'IPTV_PLAYLIST_PATH'
+IPTV_EPG_PATH = 'IPTV_EPG_PATH'
 CACHE_RESPONSE_PERIOD_SECONDS = 1800
 RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 
@@ -48,6 +49,7 @@ def main():
     ampq_url = os.environ[RABBIT_CONNECTION_STRING]
     static_folder = os.environ[STATIC_PATH]
     iptv_playlist_path = os.environ[IPTV_PLAYLIST_PATH]
+    iptv_epg_path = os.environ[IPTV_EPG_PATH]
     rpc_publisher = RpcPublisher(ampq_url)
     aiohHttpServer = AiohttpHttpServer(6789)
 
@@ -106,7 +108,8 @@ def main():
         HttpRoute(HTTPMethod.GET, f'{API_PREFIX}/sync/history', GetSyncHistoryRequestExecutor(rpc_publisher)),
 
         # iptv
-        HttpRoute(HTTPMethod.GET, f'{API_PREFIX}/iptv.m3u', GetIptvPlaylistExecutor(rpc_publisher, iptv_playlist_path)),
+        HttpRoute(HTTPMethod.GET, f'{API_PREFIX}/iptv.m3u', GetFileExecutor(rpc_publisher, iptv_playlist_path)),
+        HttpRoute(HTTPMethod.GET, f'{API_PREFIX}/epg.xml', GetFileExecutor(rpc_publisher, iptv_epg_path)),
     ])
     aiohHttpServer.serve_forever()
 
