@@ -13,15 +13,19 @@ from core.rabbitmq.rpc.rpc_publisher import RpcPublisher
 
 RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
 IPTV_PLAYLIST_PATH = 'IPTV_PLAYLIST_PATH'
+IPTV_EPG_PATH = 'IPTV_EPG_PATH'
+IPTV_EPG_URL = 'IPTV_EPG_URL'
 
 
 def main():
     logger_service = Logger_Service()
     ampq_url = os.environ[RABBIT_CONNECTION_STRING]
     iptv_playlist_path = os.environ[IPTV_PLAYLIST_PATH]
+    iptv_epg_path = os.environ[IPTV_EPG_PATH]
+    iptv_epg_url = os.environ[IPTV_EPG_URL]
     rpc_publisher = RpcPublisher(ampq_url)
 
-    iptvModificationService = IptvModificationService(logger_service, iptv_playlist_path)
+    iptvModificationService = IptvModificationService(logger_service, iptv_playlist_path, iptv_epg_path, 7, iptv_epg_url)
 
     updateService = UpdateService(logger_service, 12, rpc_publisher, iptvModificationService)
     updateService.run()

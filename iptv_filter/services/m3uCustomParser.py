@@ -1,8 +1,7 @@
 import re
 import urllib.request
 
-from iptv_filter.models.ExtM3uHeader import ExtM3uHeader
-from iptv_filter.models.ExtM3uInformation import ExtM3uInformation
+from iptv_filter.models.playlist.ExtM3uInformation import ExtM3uInformation
 from iptv_filter.services.linkCheckerService import LinkCheckerService
 
 
@@ -12,6 +11,7 @@ class M3uParser:
         self.channels: [ExtM3uInformation] = []
         self.channel_black_list = []
         self.category_black_list = []
+        self.epgs: [str] = []
         with urllib.request.urlopen(url) as response:
             content = response.read()
             self.content = content.decode("utf-8")
@@ -38,8 +38,8 @@ class M3uParser:
             url_tvg_raw = self.checkRegex("url-tvg=\"(.*?)\"", lineInfo)
             tvg_shift = self.checkRegex("tvg-shift=\"(.*?)\"", lineInfo)
             abs = self.checkRegex("abs=\"(.*?)\"", lineInfo)
-            self.header = ExtM3uHeader()
-            self.header.url_tvg = url_tvg_raw
+            self.epgs = url_tvg_raw.split(',')
+
         else:
             if lineLink == '':
                 return

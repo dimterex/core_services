@@ -10,6 +10,8 @@ services:
       - RABBIT_AMPQ_URL=amqp://guest:guest@my_rabbit:5672
       - PYTHONUNBUFFERED=1
       - IPTV_PLAYLIST_PATH=/storage/custom.m3u
+      - IPTV_EPG_PATH=/storage/epg.xml
+      - IPTV_EPG_URL=http://190.160.1.53:60009/api/epg.xml
     restart: unless-stopped
 
 networks:

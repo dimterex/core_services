@@ -1,7 +1,7 @@
 configuration: '0.2'
 discord_bot: '0.10'
 docker_bot: '0.1'
-iptv_filter: '0.3'
+iptv_filter: '0.4'
 jira_tracker: '0.1'
 keenetic_prometheus_exporter: '0.3'
 outlook: '0.2'
