@@ -1,4 +1,5 @@
 from datetime import timezone, datetime, timedelta
+import html
 
 
 class EpgProgram:
@@ -15,9 +16,9 @@ class EpgProgram:
         stop = self.stop_time.strftime("%Y%m%d%H%M%S %z")
 
         result = f'<programme start="{start}" stop="{stop}" channel="{self.channel_id}">\n'
-        result += f'\t<title lang="ru">{self.title}</title>\n'
+        result += f'\t<title lang="ru">{html.escape(self.title)}</title>\n'
         if self.description is not None:
-            result += f'\t<desc lang="ru">{self.description}</desc>\n'
+            result += f'\t<desc lang="ru">{html.escape(self.description)}</desc>\n'
         result += '</programme>'
         return result
 

@@ -4,6 +4,6 @@ class PlaylistM3uHeader:
 
     def toRaw(self):
         return [
-            f'#EXTM3U url-tvg="{",".join(self.url_tvg)}"',
+            f'#EXTM3U url-tvg="{self.url_tvg}"',
             ''
         ]

@@ -25,7 +25,8 @@ def main():
     iptv_epg_url = os.environ[IPTV_EPG_URL]
     rpc_publisher = RpcPublisher(ampq_url)
 
-    iptvModificationService = IptvModificationService(logger_service, iptv_playlist_path, iptv_epg_path, 7, iptv_epg_url)
+    # ToDo: ПОнять почему 7 не работает
+    iptvModificationService = IptvModificationService(logger_service, iptv_playlist_path, iptv_epg_path, 3, iptv_epg_url)
 
     updateService = UpdateService(logger_service, 12, rpc_publisher, iptvModificationService)
     updateService.run()
