@@ -27,10 +27,11 @@ DOCKER_COMPOSE_FILE = 'docker-compose.yml'
 UPDATE_SCRIPT_FILE_NAME = 'update.sh'
 DOCKER_REMOTE_BASE_URL = 'tcp://dimterex-ubuntu:2375'
 
+EXIT_COMMAND_ID = 0
+COMMANDS = {}
+
 
 def main():
-    print("---- Starting deploy script")
-
     if os.path.exists(TARGET_FOLDER):
         shutil.rmtree(TARGET_FOLDER)
     os.mkdir(TARGET_FOLDER)
@@ -46,23 +47,51 @@ def main():
         if top_level_dir not in changed_modules:
             changed_modules.append(top_level_dir)
 
-    print(f'Количество изменений: {len(changed_modules)}')
-    for dir_name in changed_modules:
-        print(dir_name)
+    add_command(EXIT_COMMAND_ID, "Выход", f'')
 
+    command_id = EXIT_COMMAND_ID
     for directory in changed_modules:
-        if directory in IGNORE_FOLDERS:
-            continue
+        if directory not in IGNORE_FOLDERS:
+            command_id = command_id + 1
+            add_command(command_id, directory, f'')
 
-        docker_folder_path = os.path.join(TARGET_FOLDER, directory)
+    show_menu(changed_modules)
 
-        source_full_path = os.path.join(SOURCE_FOLDER, directory)
-        copy_for_docker_image(source_full_path, directory, docker_folder_path)
+    while True:
+        try:
+            action_number = int(input("Input number: "))
 
-        if directory == WEB_HOST_SERVICE:
-            copy_web_pages(SOURCE_PAGES, os.path.join(docker_folder_path, WEB_HOST_PAGES))
+            if action_number == EXIT_COMMAND_ID:
+                break
 
-        print(f'{directory} copied')
+            if action_number in COMMANDS:
+                deploy_image(COMMANDS[action_number]["title"])
+                show_menu(changed_modules)
+            else:
+                print("Неверный номер.")
+                show_menu(changed_modules)
+
+        except ValueError:
+            print("Неверный ввод.")
+    return
+
+
+def show_menu(changed_modules):
+    print(f'Select a container: {len(changed_modules)}')
+    for command in COMMANDS:
+        print(f'{command}. {COMMANDS[command]["title"]}')
+
+
+def deploy_image(directory):
+    print(f'---- Starting deploy script {directory}')
+
+    docker_folder_path = os.path.join(TARGET_FOLDER, directory)
+
+    source_full_path = os.path.join(SOURCE_FOLDER, directory)
+    copy_for_docker_image(source_full_path, directory, docker_folder_path)
+
+    if directory == WEB_HOST_SERVICE:
+        copy_web_pages(SOURCE_PAGES, os.path.join(docker_folder_path, WEB_HOST_PAGES))
 
     update_script_content = {}
     for directory in os.listdir(TARGET_FOLDER):
@@ -148,7 +177,7 @@ def build_docker_image(path, tag, version, remote_base_url):
     image_tag = f'{tag}:{version}'
     client = docker.DockerClient(base_url=remote_base_url)
     print(f"Image {image_tag} building ...")
-    image, _ = client.images.build(path=path, tag=image_tag)
+    image, _ = client.images.build(path=path, tag=image_tag, rm=True)
     print(f"Image {image_tag} saved successfully.")
 
 
@@ -178,6 +207,12 @@ def copy_for_docker_image(source: str, directory: str, target: str):
         os.path.join(target, directory, 'docker-compose.yml'),
         os.path.join(target, 'docker-compose.yml'))
 
+
+def add_command(id, title, action):
+    COMMANDS[id] = {
+        "title": title,
+        "action": action,
+    }
 
 if __name__ == '__main__':
     main()

@@ -2,6 +2,8 @@ import os
 
 from configuration.database.credentials_table import CredentialsTable
 from configuration.database.iptv_black_list_table import IptvBlackListTable
+from configuration.database.iptv_duplicate_list_table import IptvDuplicateListTable
+from configuration.database.iptv_epg_sources_table import IptvEpgSourcesTable
 from configuration.database.iptv_sources_table import IptvSourcesTable
 from configuration.database.meeting_categories_table import MeetingCategoriesTable
 from configuration.database.periodical_tasks_table import PeriodicalTasksTable
@@ -28,6 +30,8 @@ class ConfigurationStorage(BaseStorage):
         self.tracks_table = TracksTable(logger, path)
         self.iptv_black_list_table = IptvBlackListTable(logger, path)
         self.iptv_sources_table = IptvSourcesTable(logger, path)
+        self.iptv_epg_sources_table = IptvEpgSourcesTable(logger, path)
+        self.iptv_duplicate_list_table = IptvDuplicateListTable(logger, path)
         super().__init__(logger, path)
 
     def get_create_table_request(self) -> list[str]:
@@ -41,4 +45,6 @@ class ConfigurationStorage(BaseStorage):
             self.tracks_table.get_initialize_table(),
             self.iptv_black_list_table.get_initialize_table(),
             self.iptv_sources_table.get_initialize_table(),
+            self.iptv_epg_sources_table.get_initialize_table(),
+            self.iptv_duplicate_list_table.get_initialize_table(),
         ]

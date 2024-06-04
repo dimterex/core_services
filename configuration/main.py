@@ -8,6 +8,8 @@ from configuration.handlers.iptv_black_list.add_black_list_item_request_handler 
 from configuration.handlers.iptv_black_list.get_black_list_request_handler import GetBlackListRequestHandler
 from configuration.handlers.iptv_black_list.remove_black_list_item__request_handler import \
     RemoveBlackListItemRequestHandler
+from configuration.handlers.iptv_duplicate_list.get_duplicate_list_request_handler import GetDuplicateListRequestHandler
+from configuration.handlers.iptv_epg_sources.get_iptv_epg_sources_request_handler import GetIptvEpgSourcesRequestHandler
 from configuration.handlers.iptv_source.get_iptv_sources_request_handler import GetIptvSourcesRequestHandler
 from configuration.handlers.meetings_caegories.add_new_meeting_category_request_handler import \
     AddNewMeetingCategoryRequestHandler
@@ -114,6 +116,8 @@ def main():
     api_controller.subscribe(GetBlackListRequestHandler(storage.iptv_black_list_table))
     api_controller.subscribe(RemoveBlackListItemRequestHandler(storage.iptv_black_list_table))
     api_controller.subscribe(GetIptvSourcesRequestHandler(storage.iptv_sources_table))
+    api_controller.subscribe(GetIptvEpgSourcesRequestHandler(storage.iptv_epg_sources_table))
+    api_controller.subscribe(GetDuplicateListRequestHandler(storage.iptv_duplicate_list_table))
 
     rcp = RpcConsumer(ampq_url, CONFIGURATION_QUEUE, api_controller)
     rcp.start()
