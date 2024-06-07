@@ -26,7 +26,7 @@ class IptvModificationService:
         epgService = EpgService(self.logger_Service, self.iptv_epg_path, self.timezone, epgs)
         playlistService = PlaylistService(self.logger_Service, self.iptv_playlist_path, sources, duplicate_sources, black_list, self.playlistM3uHeader)
 
-        channel_names = [item.title for item in playlistService.channel_list]
+        channel_names = [item.title.lower() for item in playlistService.channel_list]
         epgService.update(channel_names)
         self.show_diff(channel_names)
 

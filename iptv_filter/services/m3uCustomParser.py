@@ -62,4 +62,3 @@ class M3uParser:
             return m.group(1)
         else:
             return None
-

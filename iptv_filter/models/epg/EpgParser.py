@@ -4,12 +4,11 @@ import shutil
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
-import urllib.request
-
 import requests
 
 from iptv_filter.models.epg.EpgChannel import EpgChannel
 from iptv_filter.models.epg.EpgProgram import EpgProgram
+from iptv_filter.services.channelNameParser import ChannelNameParser
 
 
 class EpgParser:
@@ -17,6 +16,7 @@ class EpgParser:
     def __init__(self, channels: [str], timezone: int):
         self.timezone = timezone
         self.channels = channels
+        self.channelNameParser = ChannelNameParser()
 
     def unzip_gz_file(self, gz_file_path):
         unzipped_file_path = os.path.splitext(gz_file_path)[0]
@@ -51,9 +51,10 @@ class EpgParser:
             display_names = channel_elem.findall('display-name')
 
             display_name = None
-            for channel_name in display_names:
-                if channel_name.text in self.channels:
-                    display_name = channel_name.text
+            for epg_channel_name in display_names:
+                channel_name, channel_format = self.channelNameParser.parse(epg_channel_name.text)
+                if channel_name.lower() in self.channels:
+                    display_name = channel_name
                     break
 
             if display_name is None:
