@@ -15,7 +15,7 @@ from yandex.services.tags_service import TagsService
 from yandex.services.yandex_service import YandexMusicService
 
 RABBIT_CONNECTION_STRING = 'RABBIT_AMPQ_URL'
-DOWNLOAD_DIRECTORY_PATH = '/downloads'
+DOWNLOAD_DIRECTORY_PATH = '/music'
 
 
 def main():

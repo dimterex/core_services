@@ -14,3 +14,4 @@ soundcloud-lib
 lxml
 requests-html
 jsonpath_rw
+python-telegram-bot

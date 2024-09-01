@@ -23,7 +23,10 @@ class M3uParser:
         numLine = len(lines)
         for n in range(numLine):
             lineInfo = lines[n]
-            if lineInfo.startswith("#"):
+            # print(lineInfo)
+            # if 'Исправить' in lineInfo:
+            #     pass
+            if lineInfo.startswith("#EXTINF"):
                 lineLink = lines[n + 1]
                 extvcopt = None
                 if lineLink.startswith("#"):

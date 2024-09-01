@@ -31,18 +31,26 @@ class PlaylistService:
         for url in sources:
             parser = M3uParser(url, self.link_checker)
             self.channel_list += parser.channels
+
+        self.logger_Service.info(self.TAG, f'Loaded {len(self.channel_list)} channels.')
+
         self.remove_duplicates([element for element in duplicates if element.type == CHANNEL_TYPE])
+        self.logger_Service.info(self.TAG, f'After remove duplicates {len(self.channel_list)} channels.')
 
         self.rename_categories([element for element in duplicates if element.type == CATEGORY_TYPE])
+        self.logger_Service.info(self.TAG, f'After remove categories {len(self.channel_list)} channels.')
 
         category_black_list = [element.value for element in black_list if element.type == CATEGORY_TYPE]
         self.remove_categories(category_black_list)
+        self.logger_Service.info(self.TAG, f'After remove categories {len(self.channel_list)} channels.')
 
         regex_black_list = [element.value for element in black_list if element.type == REGEX_TYPE]
         self.remove_regex(regex_black_list)
+        self.logger_Service.info(self.TAG, f'After remove regex {len(self.channel_list)} channels.')
 
         channel_black_list = [element.value.lower() for element in black_list if element.type == CHANNEL_TYPE]
         self.remove_channels(channel_black_list)
+        self.logger_Service.info(self.TAG, f'After remove channels {len(self.channel_list)} channels.')
 
         # self.remove_unworking()
 

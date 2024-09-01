@@ -36,3 +36,4 @@ class UpdateService(ScheduleService):
         duplicate_sources_raw = self.rpcPublisher.call(CONFIGURATION_QUEUE, GetIptvDuplicateListRequest())
         duplicate_sources: [IptvDuplicateListItemModel] = [IptvDuplicateListItemModel.deserialize(element) for element in duplicate_sources_raw.message]
         self.iptvModificationService.run(sources, duplicate_sources, black_list, epg_sources)
+

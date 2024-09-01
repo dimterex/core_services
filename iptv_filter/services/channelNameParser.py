@@ -22,6 +22,10 @@ class ChannelNameParser:
             'RO',
             'FHD UK',
             'DE',
+            '4k',
+            '4K',
+            'EDTV 576i',
+            'SDTV 576p',
         ]
 
     def parse(self, input_title):

@@ -69,8 +69,8 @@ if __name__ == '__main__':
     for metric_configuration in metrics_configuration['metrics']:
 
         _command: str = metric_configuration['command']
-        if _command != 'ntce hosts':
-            continue
+        # if _command != 'ntce hosts':
+        #     continue
         _params = metric_configuration.get('param', {})
         _root = parse(metric_configuration['root'])
         _tags = json_path_init(metric_configuration['tags'])

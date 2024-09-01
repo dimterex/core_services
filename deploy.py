@@ -25,7 +25,7 @@ CONFIG_NAME = 'config.yml'
 DOCKER_COMPOSE_FILE = 'docker-compose.yml'
 
 UPDATE_SCRIPT_FILE_NAME = 'update.sh'
-DOCKER_REMOTE_BASE_URL = 'tcp://dimterex-ubuntu:2375'
+DOCKER_REMOTE_BASE_URL = 'tcp://server:2375'
 
 EXIT_COMMAND_ID = 0
 COMMANDS = {}

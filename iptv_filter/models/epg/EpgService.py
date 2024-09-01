@@ -18,9 +18,9 @@ class EpgService:
         for epg in self.epgs:
             channels, programs = EpgParser(channel_names, self.timezone).parse_xmltv(epg)
 
-            names = [channels[item].display_name for item in channels]
-            self.logger_Service.info(self.TAG, f'TV channels {epg}: {len(names)}.')
-            self.logger_Service.info(self.TAG, f'TV channels {"; ".join(names)}.')
+            # names = [channels[item].display_name for item in channels]
+            # self.logger_Service.info(self.TAG, f'TV channels {epg}: {len(names)}.')
+            # self.logger_Service.info(self.TAG, f'TV channels {"; ".join(names)}.')
             self.tv_programs += programs
             self.tv_program_channels.update(channels)
 
