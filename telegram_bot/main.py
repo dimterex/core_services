@@ -39,7 +39,7 @@ def main():
     # path = ''
     telegram_bot = TelegramBot(token_response.message,
                                PipDownloadCommand(temp_folder_path),
-                               WebpageDownloadCommand(temp_folder_path),
+                               WebpageDownloadCommand(temp_folder_path, logger_service),
                                FileDownloadCommand(temp_folder_path))
     telegram_bot.start()
 

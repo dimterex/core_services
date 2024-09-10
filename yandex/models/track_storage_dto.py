@@ -6,3 +6,4 @@ class TrackStorageDto:
         self.cover_path = os.path.join(track_path, f'{track_name}.png')
         self.file_path = os.path.join(track_path, f'{track_name}.mp3')
         self.track_name = track_name
+        self.is_exist = os.path.exists(self.file_path)

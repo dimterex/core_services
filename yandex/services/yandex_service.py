@@ -91,6 +91,9 @@ class YandexMusicService:
         client = Client(self.token).init()
         track = client.tracks(track_id)[0]
         track_storage_dto = TrackStorageDto(track_path, track_name)
+        if track_storage_dto.is_exist:
+            self.logger_Service.debug(self.TAG, f'File exist: {track_name}')
+            return track_storage_dto
         track.download_cover(track_storage_dto.cover_path, '1000x1000')
         track.download(track_storage_dto.file_path, 'mp3', 320)
         self.logger_Service.debug(self.TAG, f'End download: {track_name}')

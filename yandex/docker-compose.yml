@@ -4,7 +4,7 @@ services:
   yandex:
     volumes:
       - /mnt/7F5DCC5C7797EDE5/Для разбора/Музыка:/downloads
-      - /mnt/7F5DCC5C7797EDE5/Синхронизация:/music
+      - /mnt/7F5DCC5C7797EDE5/Синхронизация/Музыка:/music
     environment:
       - RABBIT_AMPQ_URL=amqp://guest:guest@my_rabbit:5672
       - PYTHONUNBUFFERED=1

@@ -41,12 +41,9 @@ class DownloadLikesTracksHandler(ScheduleService):
                 # Change name of the final file here
 
                 track_storage_dto = self.yandexMusicService.download(track)
-
-                self.trackService.set_metadata(track, track_storage_dto)
-                os.remove(track_storage_dto.cover_path)
+                if not track_storage_dto.is_exist:
+                    self.trackService.set_metadata(track, track_storage_dto)
+                    os.remove(track_storage_dto.cover_path)
                 add_track_model_response = self.rpcPublisher.call(CONFIGURATION_QUEUE, AddNewTrackRequest(track.id, track_storage_dto.track_name, YANDEX_MUSIC_SOURCE))
                 if add_track_model_response.status == ERROR_STATUS_CODE:
                     raise Exception(add_track_model_response.message)
-
-
-
