@@ -15,3 +15,4 @@ lxml
 requests-html
 jsonpath_rw
 python-telegram-bot
+httpx

@@ -1,6 +1,5 @@
-import telegram
-from telegram import ForceReply, Update, BotCommand
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram import  Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 
 from telegram_bot.models.commands.file_download_command import FileDownloadCommand
 from telegram_bot.models.commands.pip_download_command import PipDownloadCommand
@@ -16,7 +15,6 @@ class TelegramBot:
         self.pipDownloadCommand = pipDownloadCommand
         self.webpageDownloadCommand = webpageDownloadCommand
         self.fileDownloadCommand = fileDownloadCommand
-
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Help!")

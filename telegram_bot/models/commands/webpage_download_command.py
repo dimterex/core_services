@@ -30,6 +30,11 @@ class WebpageDownloadCommand:
         client = docker.DockerClient(base_url=self.DOCKER_REMOTE_BASE_URL)
         container = client.containers.run("singlefilez", f'"{url}"', auto_remove=True)
         self.logger_service.debug(self.TAG, f'Saving {url}')
+        if len(container) == 0:
+            self.logger_service.debug(self.TAG, f'Can not download {url}')
+            await message.edit_text(f'Can not download page.')
+            return
+
         with open(target_path, 'wb') as file:
             file.write(container)
         self.logger_service.debug(self.TAG, f'Packaging {url}')

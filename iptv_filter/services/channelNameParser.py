@@ -26,6 +26,11 @@ class ChannelNameParser:
             '4K',
             'EDTV 576i',
             'SDTV 576p',
+            'EDTV',
+            'SDTV',
+            'FWVGA',
+            'WVGA',
+            'EDTV 404',
         ]
 
     def parse(self, input_title):
